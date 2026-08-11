@@ -1,0 +1,8 @@
+[a-0] pass=7/8 dur=953s agent_rc=0
+[a-0] regression: 0 passed / 0 failed (baseline 107/0)
+[a-1] pass=8/8 dur=587s agent_rc=0
+[a-1] regression: 107 passed / 0 failed (baseline 107/0)
+[a-0] pass=7/8 dur=330s agent_rc=0
+[a-0] regression: 107 passed / 0 failed (baseline 107/0)
+[c-0] pass=8/8 dur=1901s agent_rc=0
+[c-0] regression: 107 passed / 0 failed (baseline 107/0)

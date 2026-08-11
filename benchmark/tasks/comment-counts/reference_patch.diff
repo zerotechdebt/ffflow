@@ -1,0 +1,26 @@
+diff --git a/apps/articles/models.py b/apps/articles/models.py
+index f83f5d9..c4d737d 100644
+--- a/apps/articles/models.py
++++ b/apps/articles/models.py
+@@ -13,7 +13,8 @@ User = get_user_model()
+ class ArticleQuerySet(models.QuerySet):
+     def with_favorites(self, user: AnonymousUser | User) -> Self:
+         return self.annotate(
+-            num_favorites=models.Count("favorites"),
++            num_favorites=models.Count("favorites", distinct=True),
++            num_comments=models.Count("comment", distinct=True),
+             is_favorite=(
+                 models.Exists(get_user_model().objects.filter(pk=user.id, favorites=models.OuterRef("pk")))
+                 if user.is_authenticated
+diff --git a/templates/partials/article_list.html b/templates/partials/article_list.html
+index 12a826f..2fa96f5 100644
+--- a/templates/partials/article_list.html
++++ b/templates/partials/article_list.html
+@@ -15,6 +15,7 @@
+     <h1>{{ article.title }}</h1>
+     <p>{{ article.summary }}</p>
+     <span>Read more...</span>
++    <span class="comment-count">{{ article.num_comments }} comments</span>
+     {% if article.tags.all %}
+     <ul class="tag-list">
+       {% for tag in article.tags.all %}

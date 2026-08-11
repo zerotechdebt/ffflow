@@ -174,14 +174,15 @@ class NotificationBehaviorTests(TestCase):
         # mark read via the notifications page's mark-read action, discovered
         marked = False
         for name in ("notifications_mark_read", "notification_mark_read",
-                     "mark_notifications_read", "notifications_read", "mark_read"):
+                     "mark_notifications_read", "notifications_read", "mark_read",
+                     "notifications_read_all", "read_all_notifications", "notifications_mark_all_read"):
             try:
                 url = reverse(name)
             except NoReverseMatch:
                 # maybe it takes a pk
                 notifs = _notifications_for(self.bob) or []
                 if notifs:
-                    for nm in ("notification_mark_read", "notification_read", "mark_read"):
+                    for nm in ("notification_mark_read", "notification_read", "mark_read", "notification_read_all"):
                         try:
                             url = reverse(nm, kwargs={"pk": notifs[0].pk})
                         except NoReverseMatch:

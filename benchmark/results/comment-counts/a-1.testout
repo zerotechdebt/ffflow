@@ -1,0 +1,34 @@
+Creating test database for alias 'default'...
+FFF...
+======================================================================
+FAIL: test_both_counts_correct_simultaneously (countprobe.tests.CommentCountTests.test_both_counts_correct_simultaneously)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/claude/bench-ws/comment-counts-a-1/countprobe/tests.py", line 134, in test_both_counts_correct_simultaneously
+    self.assertEqual(cc, 3, "comments must be 3")
+AssertionError: None != 3 : comments must be 3
+
+======================================================================
+FAIL: test_comment_count_annotation_present_and_correct (countprobe.tests.CommentCountTests.test_comment_count_annotation_present_and_correct)
+A public listing queryset must expose a correct comment count.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/claude/bench-ws/comment-counts-a-1/countprobe/tests.py", line 101, in test_comment_count_annotation_present_and_correct
+    self.assertTrue(found, f"no comment-count annotation found (tried {candidates})")
+AssertionError: [] is not true : no comment-count annotation found (tried ('num_comments', 'comment_count', 'comments_count', 'n_comments'))
+
+======================================================================
+FAIL: test_comment_count_correct_with_zero_comments (countprobe.tests.CommentCountTests.test_comment_count_correct_with_zero_comments)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/claude/bench-ws/comment-counts-a-1/countprobe/tests.py", line 115, in test_comment_count_correct_with_zero_comments
+    self.fail("no comment-count annotation found")
+AssertionError: no comment-count annotation found
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.610s
+
+FAILED (failures=3)
+Destroying test database for alias 'default'...
+Found 6 test(s).
+System check identified no issues (0 silenced).

@@ -1,0 +1,17 @@
+Creating test database for alias 'default'...
+...F....
+======================================================================
+FAIL: test_mark_read_decrements_unread (notifprobe.tests.NotificationBehaviorTests.test_mark_read_decrements_unread)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/claude/bench-ws/notifications-claude-haiku-4-5-20251001-a-0/notifprobe/tests.py", line 197, in test_mark_read_decrements_unread
+    self.assertTrue(marked, "a mark-read action must exist")
+AssertionError: False is not true : a mark-read action must exist
+
+----------------------------------------------------------------------
+Ran 8 tests in 1.621s
+
+FAILED (failures=1)
+Destroying test database for alias 'default'...
+Found 8 test(s).
+System check identified no issues (0 silenced).

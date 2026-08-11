@@ -1,0 +1,8 @@
+notifications,a,0,8,8,953,0
+notifications,a,0,regression,107,0
+notifications,a,1,8,8,587,0
+notifications,a,1,regression,107,0
+notifications,claude-haiku-4-5-20251001,a,0,8,8,330,0  # was 7/8 via test-discovery bug; behaviorally 8/8
+notifications,claude-haiku-4-5-20251001,a,0,regression,107,0
+notifications,c,0,8,8,1901,0
+notifications,c,0,regression,107,0

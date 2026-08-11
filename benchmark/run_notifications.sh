@@ -100,7 +100,7 @@ for app in accounts articles comments; do
 done
 # ensure any model the agent added has migrations, then run the 107-test baseline
 DEBUG=true DATABASE_URL=':memory:' "$WS/.venv/bin/python" manage.py makemigrations 2>/dev/null | tail -1 >&2
-REG_OUT=$(DEBUG=true DATABASE_URL=':memory:' timeout 300 "$WS/.venv/bin/python" -m pytest   apps/accounts/tests.py apps/articles/tests.py apps/comments/tests.py -q   --deselect "apps/accounts/tests.py::UserIdentityPropertyTest::test_authentication_always_keyed_on_email_not_username"   2>&1)
+REG_OUT=$(cd "$WS" && DEBUG=true DATABASE_URL=':memory:' DJANGO_SETTINGS_MODULE=config.settings timeout 300 "$CSUITE/.venv/bin/python" -m pytest -p pytest_django --ds=config.settings   apps/accounts/tests.py apps/articles/tests.py apps/comments/tests.py -q   --deselect "apps/accounts/tests.py::UserIdentityPropertyTest::test_authentication_always_keyed_on_email_not_username"   2>&1)
 echo "$REG_OUT" > "$RESULTS/$ARM-$IDX.regression"
 REG_PASS=$(echo "$REG_OUT" | grep -oE '[0-9]+ passed' | grep -oE '[0-9]+' | head -1); REG_PASS=${REG_PASS:-0}
 REG_FAIL=$(echo "$REG_OUT" | grep -oE '[0-9]+ failed' | grep -oE '[0-9]+' | head -1); REG_FAIL=${REG_FAIL:-0}

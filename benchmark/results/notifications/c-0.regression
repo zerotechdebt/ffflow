@@ -1,0 +1,9 @@
+........................................................................ [ 67%]
+...................................                                      [100%]
+=============================== warnings summary ===============================
+apps/accounts/tests.py::FollowGraphSelfPropertyTest::test_self_follow_never_adds_user_to_own_followers
+  /home/claude/working/aaia-summer-2026-c/.venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1148: RemovedInDjango60Warning: The default scheme will be changed from 'http' to 'https' in Django 6.0. Pass the forms.URLField.assume_scheme argument to silence this warning, or set the FORMS_URLFIELD_ASSUME_HTTPS transitional setting to True to opt into using 'https' as the new default scheme.
+    return form_class(**defaults)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+107 passed, 1 deselected, 1 warning in 32.74s
