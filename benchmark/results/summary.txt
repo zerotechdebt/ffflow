@@ -1,0 +1,6 @@
+[a-0] pass=8/8 dur=533s agent_rc=0 (rescored from pre-fix run)
+[a-1] pass=8/8 dur=456s agent_rc=0
+[a-1] pass=8/8 dur=961s agent_rc=0
+[a-2] pass=8/8 dur=537s agent_rc=0
+[a-3] pass=8/8 dur=648s agent_rc=0
+[c-0] pass=8/8 dur=1248s agent_rc=0
