@@ -76,9 +76,18 @@ nav.side {
   background: var(--surface); border-right: 1px solid var(--line);
   display: flex; flex-direction: column; padding: 16px 10px;
 }
-.brand { padding: 0 8px 12px; }
-.brand .repo { font-weight: 600; font-size: 15px; }
-.brand .when { font-size: 11px; color: var(--ink-3); }
+.home {
+  display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 10px; align-items: center;
+  padding: 8px; margin-bottom: 4px; border-radius: 8px; text-decoration: none; color: var(--ink);
+  transition: background-color .15s ease-out;
+}
+.home:hover { background: var(--select); }
+.home[aria-current="page"] { background: var(--select); }
+.home .mark { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; background: var(--raised); border: 1px solid var(--line); color: var(--ink); }
+.home[aria-current="page"] .mark { background: var(--ink); border-color: var(--ink); color: var(--page); }
+.home .mark svg { width: 18px; height: 18px; }
+.home .repo { font-weight: 600; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.home .when { font-size: 11px; color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .nav-section { margin-top: 14px; }
 .nav-head { display: flex; justify-content: space-between; align-items: center; padding: 0 8px 4px; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-3); }
 .nav-item {
@@ -312,6 +321,7 @@ td.n { font-variant-numeric: tabular-nums; }
     "?": [["path", { d: "M6.2 6.3a1.9 1.9 0 1 1 2.6 1.8c-.5.2-.8.6-.8 1.1v.3", fill: "none", stroke: "currentColor", "stroke-width": "1.8", "stroke-linecap": "round" }],
           ["circle", { cx: "8", cy: "11.9", r: "1", fill: "currentColor" }]],
     "=": [["path", { d: "M5 6.5h6M5 9.5h6", fill: "none", stroke: "currentColor", "stroke-width": "1.8", "stroke-linecap": "round" }]],
+    home: [["path", { d: "M2.75 7.4 8 3l5.25 4.4M4.25 6.3v6.2c0 .3.2.5.5.5H6.9V9.9h2.2V13h2.15c.3 0 .5-.2.5-.5V6.3", fill: "none", stroke: "currentColor", "stroke-width": "1.4", "stroke-linecap": "round", "stroke-linejoin": "round" }]],
   };
   const icon = (key) => {
     if (!ICONS[key]) return null;
@@ -455,10 +465,13 @@ td.n { font-variant-numeric: tabular-nums; }
     themeSel.value = document.documentElement.getAttribute("data-theme") || "auto";
 
     return h("nav", { class: "side", "aria-label": "Pipeline" },
-      h("div", { class: "brand" },
-        h("div", { class: "repo" }, m.repo || "Pipeline"),
-        h("div", { class: "when" }, `${m.default_ref} · ${m.generated_at || "?"}`)),
-      item("overview", null, h("span", { class: "nav-glyph" }), "Overview"),
+      // The repository is home: one obvious way back to the overview.
+      h("a", { class: "home", href: href("overview"), title: "Overview of the whole pipeline",
+        "aria-current": cur.view === "overview" || !cur.view ? "page" : null },
+        h("span", { class: "mark" }, icon("home")),
+        h("span", { style: { "min-width": "0" } },
+          h("div", { class: "repo" }, m.repo || "Pipeline"),
+          h("div", { class: "when" }, `Overview · ${m.default_ref}`))),
       // PRDs appear only when the repository has PRD bundles.
       (m.prds || []).length ? h("div", { class: "nav-section" },
         h("div", { class: "nav-head" }, `PRDs (${m.prds.length})`),
