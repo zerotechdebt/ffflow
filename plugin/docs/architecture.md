@@ -466,7 +466,7 @@ For each skill: purpose, inputs, outputs, dependencies (other skills it loads), 
 - Joins epics to roots and phases from both sides: the `docs/roadmap/<slug>/…` link in the epic body and `Epic: #N` under a plan file's `## Captured tasks`.
 - Progress is task issue state, not checklist ticks. Data gaps (unlinked epics, missing roots, stale numbering) are findings, never silently fixed.
 - PRDs: ppp bundles (a folder with `medium.md` and `state.json`), read directly — fff never calls ppp. A roadmap's `Source:` line links it to the bundle it was planned from.
-- Read-only. Tests: `python3 -m unittest discover -s plugin/tests`.
+- Read-only.
 
 ### 5.3 Brownfield Entry
 
