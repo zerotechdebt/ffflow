@@ -189,6 +189,7 @@ ffflow/                                # repo root (also the marketplace)
         ├── plan-breakdown/            # Cut plans into chess moves
         ├── plan-capture/              # Write issues to tracker (cartridges: github-issues, linear, jira, markdown)
         ├── plan-status/               # Show in-flight plans
+        ├── pipeline-status/           # Roll every roadmap and its epics up into one view (text or JSON)
         ├── characterize/              # Planning entry: brownfield bootstrap
         ├── work-issue/                # Execute one issue → one PR
         ├── work-epic/                 # Execute an epic's issues → one PR per epic (sequential, squashed per task)
@@ -454,6 +455,18 @@ For each skill: purpose, inputs, outputs, dependencies (other skills it loads), 
 - Scans `plan/*/` directories.
 - Reads `metadata.json` from each.
 - Reports phase (chat-incomplete, chat-complete, breakdown-complete, captured) and next command.
+
+#### `pipeline-status`
+**Purpose:** Show delivery across every roadmap after capture: what's done, in flight, next, and unattached.
+**Inputs:** Current working directory; `.ffflow/config.yaml` for the capture backend.
+**Outputs:** Text view, JSON (`schema_version: 1`) for visualization tools, or HTML: `viewer.html`, a self-contained template that renders the JSON.
+**Dependencies:** `git`; `gh` for the `github-issues` backend (the only one supported so far).
+**Implementation notes:**
+- `pipeline.py` (stdlib Python) collects plan roots from the working tree, the default ref and remote branches, plus tracker issues and open PRs, into a raw snapshot; a pure build step turns it into the model.
+- Joins epics to roots and phases from both sides: the `docs/roadmap/<slug>/…` link in the epic body and `Epic: #N` under a plan file's `## Captured tasks`.
+- Progress is task issue state, not checklist ticks. Data gaps (unlinked epics, missing roots, stale numbering) are findings, never silently fixed.
+- PRDs: ppp bundles (a folder with `medium.md` and `state.json`), read directly — fff never calls ppp. A roadmap's `Source:` line links it to the bundle it was planned from.
+- Read-only. Tests: `python3 -m unittest discover -s plugin/tests`.
 
 ### 5.3 Brownfield Entry
 
