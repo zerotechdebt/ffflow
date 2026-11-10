@@ -190,6 +190,7 @@ ffflow/                                # repo root (also the marketplace)
         ├── plan-capture/              # Write issues to tracker (cartridges: github-issues, linear, jira, markdown)
         ├── plan-status/               # Show in-flight plans
         ├── pipeline-status/           # Roll every roadmap and its epics up into one view (text or JSON)
+        ├── pipeline-next/             # What to do next per roadmap, from pipeline-status's data
         ├── characterize/              # Planning entry: brownfield bootstrap
         ├── work-issue/                # Execute one issue → one PR
         ├── work-epic/                 # Execute an epic's issues → one PR per epic (sequential, squashed per task)
@@ -467,6 +468,15 @@ For each skill: purpose, inputs, outputs, dependencies (other skills it loads), 
 - Progress is task issue state, not checklist ticks. Data gaps (unlinked epics, missing roots, stale numbering) are findings, never silently fixed.
 - PRDs: ppp bundles (a folder with `medium.md` and `state.json`), read directly — fff never calls ppp. A roadmap's `Source:` line links it to the bundle it was planned from.
 - Read-only.
+
+#### `pipeline-next`
+**Purpose:** Say what to do next, per roadmap or project-wide, with the FFFlow command for each action.
+**Inputs:** Optional roadmap slug.
+**Outputs:** Recommendations; runs a command only on confirmation.
+**Dependencies:** `pipeline-status` (its `pipeline.py` computes `next_actions`).
+**Implementation notes:**
+- Two lanes side by side: build (review an open PR, finish an epic in progress, start an unblocked epic) and plan (the next phase without an epic, once its dependencies are planned; planning runs ahead of building). Plus data gaps, and what blocks a roadmap when neither lane has anything.
+- The rules live in `pipeline.py` so the viewer and this skill agree. Suggestions only: the executor decides what starts.
 
 ### 5.3 Brownfield Entry
 

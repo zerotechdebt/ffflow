@@ -139,9 +139,19 @@ class BuildTests(unittest.TestCase):
         self.assertTrue(archive["phases"][2]["next"])
         self.assertEqual(m["summary"]["next"], [{"root": "archive", "phase": 2}])
 
+    def test_roots_are_listed_done_first_upcoming_last(self):
+        snap = snapshot()
+        snap["plan_roots"]["later"] = {"found_on": ["origin/main"], "files": {
+            "roadmap.md": "# Roadmap: later\n", "phases/phase-1.md": phase_file(1, "Someday")}}
+        snap["issues"] = [i if i["number"] != 50 else {**i, "state": "CLOSED"} for i in snap["issues"]]
+        order = [(r["slug"], r["status"]) for r in pipeline.build(snap)["roots"]]
+        self.assertEqual(order, [("solo", "done"), ("gone", "done"), ("archive", "in_progress"), ("later", "not_started")])
+
     def test_tasks_count_issue_state_not_checklist_ticks(self):
         self.assertEqual(self.epics[10]["tasks"], {"total": 2, "closed": 2, "open": []})
         self.assertEqual(self.epics[10]["checklist"], {"total": 2, "ticked": 1})
+        self.assertEqual([(x["number"], x["title"], x["state"]) for x in self.epics[10]["task_list"]],
+                         [(11, "T1 — a", "closed"), (12, "T2 — b", "closed")])
         self.assertIn("checklist-stale", self.codes)
 
     def test_single_plan_links_from_both_sides(self):
@@ -172,6 +182,69 @@ class BuildTests(unittest.TestCase):
         p2 = roots["archive"]["phases"][2]
         self.assertEqual((p2["status"], p2["external_epics"]), ("done", ["o/old#85"]))
 
+    def actions(self, snap):
+        m = pipeline.build(snap)
+        return m, {r["slug"]: r["next_actions"] for r in m["roots"]}
+
+    def test_build_and_plan_lanes_run_side_by_side(self):
+        snap = snapshot()
+        snap["issues"] += [issue(30, "Epic: Collector", "OPEN", ["epic", "ffflow-epic"], "Roadmap: docs/roadmap/archive/phases/phase-2.md"),
+                           issue(31, "T1 — a", "CLOSED", ["ffflow-task", "epic-30"]),
+                           issue(32, "T2 — b", "OPEN", ["ffflow-task", "epic-30"])]
+        m, acts = self.actions(snap)
+        kinds = [(a["lane"], a["kind"]) for a in acts["archive"]]
+        self.assertEqual(kinds[:2], [("build", "finish-epic"), ("plan", "plan-phase")])
+        finish, plan = acts["archive"][:2]
+        self.assertEqual((finish["epic"], finish["command"]), (30, "/fff:work-epic 30"))
+        self.assertIn("#32", finish["reason"])
+        self.assertEqual((plan["phase"], plan["buildable"]), (3, False))  # phase 3 waits on phase 2, still planned now
+        self.assertEqual(plan["command"], '/fff:plan-chat roadmap archive, phase 3 "Reader" (docs/roadmap/archive/phases/phase-3.md)')
+
+    def test_phase_kind_picks_the_planning_skill(self):
+        snap = snapshot()
+        snap["plan_roots"]["archive"]["files"]["phases/phase-2.md"] = phase_file(2, "Collector", depends="Phase 1.") + "**Kind:** roadmap\n"
+        _, acts = self.actions(snap)
+        plan = next(a for a in acts["archive"] if a["kind"] == "plan-phase")
+        self.assertTrue(plan["command"].startswith('/fff:plan-roadmap --phase 2 roadmap archive, phase 2 "Collector"'))
+        snap["plan_roots"]["archive"]["files"]["phases/phase-2.md"] = phase_file(2, "Collector", depends="Phase 1.") + "Kind: research\n"
+        _, acts = self.actions(snap)
+        plan = next(a for a in acts["archive"] if a["kind"] == "plan-phase")
+        self.assertIsNone(plan["command"])
+
+    def test_open_pr_comes_first_and_global_list_is_by_urgency(self):
+        snap = snapshot(pulls=[{"number": 99, "title": "x", "headRefName": "epic/50", "body": "", "url": "p"}])
+        m, acts = self.actions(snap)
+        self.assertEqual(acts["solo"][0]["kind"], "review-pr")
+        self.assertEqual(m["next_actions"][0]["kind"], "review-pr")
+
+    def test_captured_epic_on_an_unblocked_phase_can_start(self):
+        snap = snapshot()
+        snap["issues"].append(issue(30, "Epic: Collector", "OPEN", ["epic", "ffflow-epic"], "Roadmap: docs/roadmap/archive/phases/phase-2.md"))
+        snap["issues"] = [i if i["number"] != 50 else {**i, "state": "CLOSED"} for i in snap["issues"]]
+        _, acts = self.actions(snap)
+        start = [a for a in acts["archive"] if a["kind"] == "start-epic"]
+        self.assertEqual([(a["epic"], a["command"]) for a in start], [(30, "/fff:work-epic 30")])
+
+    def test_blocked_and_done_roots(self):
+        snap = snapshot()
+        files = snap["plan_roots"]["archive"]["files"]
+        files["phases/phase-2.md"] = phase_file(2, "Collector", depends="Phase 9.")
+        files["phases/phase-3.md"] = phase_file(3, "Reader", depends="Phase 2.")
+        _, acts = self.actions(snap)
+        self.assertIn("plan-phase", [a["kind"] for a in acts["archive"]])  # phase 9 doesn't exist, so P2 plans
+        snap["issues"] = [i if i["number"] != 50 else {**i, "state": "CLOSED"} for i in snap["issues"]]
+        snap["plan_roots"]["solo"]["files"]["plan.md"] = "# Plan: solo\n\n## Captured tasks\n\nEpic #50.\n"
+        _, acts = self.actions(snap)
+        self.assertEqual(acts["solo"], [])
+
+    def test_body_and_plan_file_naming_different_roots_conflict(self):
+        snap = snapshot()
+        snap["plan_roots"]["archive"]["files"]["phases/phase-2.md"] = phase_file(2, "Collector", epic=50)
+        m = pipeline.build(snap)
+        e = next(e for e in m["epics"] if e["number"] == 50)
+        self.assertEqual((e["root"], e["phase"]), ("solo", None))
+        self.assertIn("epic-link-conflict", [f["code"] for f in m["findings"]])
+
     def test_stale_branch_roots_are_omitted(self):
         self.assertNotIn("stale", self.roots)
         self.assertIn("root-stale-branch", self.codes)
@@ -189,6 +262,11 @@ class BuildTests(unittest.TestCase):
         self.assertIn("captured-epic-unknown", [f["code"] for f in m["findings"]])
         archive = next(r for r in m["roots"] if r["slug"] == "archive")
         self.assertEqual(archive["phases"][2]["status"], "unknown")
+
+    def test_blank_task_title_is_a_gap(self):
+        snap = snapshot()
+        snap["issues"] = [i if i["number"] != 11 else {**i, "title": "T1 — "} for i in snap["issues"]]
+        self.assertIn("task-title-blank", [f["code"] for f in pipeline.build(snap)["findings"]])
 
     def test_open_pr_marks_epic_in_progress(self):
         snap = snapshot(pulls=[{"number": 99, "title": "Epic 60 — x", "headRefName": "epic/60", "body": "", "url": "p"}])
@@ -271,11 +349,19 @@ class PrdTests(unittest.TestCase):
         self.assertEqual(p["title"], "Faster refunds")
         self.assertEqual(p["outcomes"], ["Customers see a refund decision within one visit (E-01).", "Agents stop re-keying orders."])
         self.assertEqual(p["metrics"][0]["source"], "facts")
-        self.assertEqual([(i["name"], i["size"]) for i in p["increments"]], [("Decision API", "M"), ("Agent screen", "S")])
-        self.assertIn("unlocks the agent screen", p["increments"][0]["text"])
+        self.assertEqual([(i["number"], i["name"], i["size"]) for i in p["increments"]],
+                         [(1, "Decision API", "M"), (2, "Agent screen", "S")])
+        self.assertEqual((p["increments"][0]["contains"], p["increments"][0]["unlocks"]),
+                         ("the rules as a service", "the agent screen"))
+        self.assertIsNone(p["increments"][1]["unlocks"])
         self.assertEqual((p["questions"]["open"], p["questions"]["answered"], p["questions"]["total"]), (1, 1, 2))
         self.assertEqual(p["provisional"], 1)
         self.assertEqual(p["planning_items"], [{"id": "P-1", "item": "Ship after the payments freeze"}])
+
+    def test_increments_in_template_form(self):
+        inc = pipeline.parse_increments("1. Import · M · a CSV reader · unlocks bulk loads\n")
+        self.assertEqual({k: inc[0][k] for k in ("name", "size", "contains", "unlocks")},
+                         {"name": "Import", "size": "M", "contains": "a CSV reader", "unlocks": "bulk loads"})
 
     def build(self, bundles, source=None, pulls=()):
         snap = snapshot(pulls=list(pulls))
@@ -298,6 +384,11 @@ class PrdTests(unittest.TestCase):
         m, prds, _ = self.build({"docs/prds/refunds": bundle("refunds", "converged")})
         self.assertEqual(prds["refunds"]["stage"], "converged")
         self.assertEqual(m["summary"]["ready_for_planning"], ["refunds"])
+
+    def test_prds_are_listed_delivered_first(self):
+        m, _, _ = self.build({"docs/prds/a": bundle("a", "drafting"), "docs/prds/b": bundle("b", "ratified")},
+                             "docs/prds/b/b-prd.md")
+        self.assertEqual([(p["slug"], p["stage"]) for p in m["prds"]], [("b", "delivering"), ("a", "drafting")])
 
     def test_roadmap_from_unconverged_prd_is_flagged(self):
         _, _, codes = self.build({"docs/prds/refunds": bundle("refunds", "drafting")}, "docs/prds/refunds/refunds-prd.md")

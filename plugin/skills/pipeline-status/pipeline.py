@@ -116,10 +116,12 @@ def parse_phase(number: int, path: str, text: str) -> dict:
     depends, dep_issues = parse_depends(dep_text)
     epics, tasks, external = parse_captured(text)
     status = _field(text, "Status")
+    kind = _field(text, "Kind")
     return {
         "number": number,
         "title": title,
         "path": path,
+        "kind": kind.split()[0].lower() if kind else None,
         "declared_status": status.lower() if status else None,
         "depends_on": depends,
         "depends_on_text": dep_text,
@@ -236,8 +238,20 @@ def _bullets(text: str) -> list[str]:
     return [_plain(para)] if para else []
 
 
+def _split_unlocks(text: str) -> tuple[str, str | None]:
+    """'contents; unlocks X.' -> ('contents', 'X')."""
+    m = re.search(r"(?i)(?:^|[;,.]\s*|\s)unlocks?\s+(.+?)\.?$", text)
+    if not m:
+        return text.strip().rstrip("."), None
+    return text[:m.start()].strip().rstrip(";,.") , m.group(1).strip()
+
+
 def parse_increments(text: str) -> list[dict]:
-    """Numbered §8 entries -> [{name, size, text}]; continuation lines join their entry."""
+    """Numbered §8 entries -> [{number, name, size, text, contains, unlocks}].
+
+    `number` is the entry's position in the PRD, for display only: increments have no stable IDs.
+    Continuation lines join their entry.
+    """
     entries: list[str] = []
     for line in text.splitlines():
         if re.match(r"^\s*\d+\.\s+", line):
@@ -245,14 +259,25 @@ def parse_increments(text: str) -> list[dict]:
         elif entries and line.strip():
             entries[-1] += " " + line.strip()
     out = []
-    for e in entries:
+    for n, e in enumerate(entries, 1):
+        parts = [x.strip() for x in e.split("·")]
+        if len(parts) >= 4 and re.fullmatch(r"XL|S|M|L", parts[1]):
+            # Template form: name · size · what it contains · what it unlocks
+            name, size, contains, unlocks = parts[0].strip("*: "), parts[1], parts[2], " · ".join(parts[3:])
+            out.append({"number": n, "name": name, "size": size, "text": f"{contains}; unlocks {unlocks}",
+                        "contains": contains, "unlocks": re.sub(r"(?i)^unlocks?\s+", "", unlocks).rstrip(".")})
+            continue
         bold = re.match(r"\*\*(.+?)\*\*:?\s*(.*)", e)
         head, rest = (bold.group(1), bold.group(2)) if bold else (e.split(":", 1)[0], e.split(":", 1)[-1])
         size = re.search(r"\b(XL|S|M|L)\b(?=[^()]*\))", head) or re.search(r"·\s*(XL|S|M|L)\s*·", e)
+        contains, unlocks = _split_unlocks(rest.strip())
         out.append({
+            "number": n,
             "name": re.sub(r"\s*\([^)]*\)\s*:?$", "", head).strip().rstrip(":"),
             "size": size.group(1) if size else None,
             "text": rest.strip(),
+            "contains": contains,
+            "unlocks": unlocks,
         })
     return out
 
@@ -301,6 +326,91 @@ def _cites(path: str, source: dict | None) -> bool:
     if not source:
         return False
     return any(p == path or p.startswith(path + "/") for p in source["paths"]) or (path + "/") in source["text"]
+
+
+# ---------------------------------------------------------------- next actions (pure)
+
+LANES = ("build", "plan", "data", "blocked")
+# A phase's Kind: picks the skill that plans it (plan-roadmap's handoff table). Unknown kinds plan with plan-chat.
+PLAN_HANDOFF = {"design-slice": "/fff:plan-chat", "plan-chat": "/fff:plan-chat", "characterize": "/fff:characterize",
+                "cleanup": "/fff:audit --plan", "roadmap": "/fff:plan-roadmap --phase {n}"}
+# Across roots, the most urgent first: unblock review, finish what's started, start, then plan.
+ACTION_ORDER = ("review-pr", "finish-epic", "start-epic", "plan-phase", "plan-roadmap")
+
+
+def _action(lane, kind, title, reason, command=None, **ref):
+    return {"lane": lane, "kind": kind, "title": title, "reason": reason, "command": command, **ref}
+
+
+def next_actions(root: dict, epics: dict[int, dict], findings: list[dict]) -> list[dict]:
+    """What to do next on one root, in two lanes that run side by side.
+
+    build: review an open PR, finish an epic in progress, start a captured epic whose phase is unblocked.
+    plan:  the next phase with no epic, once every phase it depends on is at least planned. Planning
+           runs ahead of building: dependencies gate starting the build, not planning.
+    data:  warnings on this root's trail. blocked: when neither lane has anything, what's in the way.
+    Suggestions only; the executor decides what actually starts.
+    """
+    if root["kind"] == "external" or root["status"] == "done":
+        return []
+    acts: list[dict] = []
+    phases = {p["number"]: p for p in root["phases"]}
+    mine = [(n, p) for p in root["phases"] for n in p["epics"]] + [(n, None) for n in root["epics"]]
+    mine = [(epics[n], p) for n, p in mine if n in epics]
+
+    for e, p in mine:
+        if e["status"] != "done" and e["open_pulls"]:
+            prs = ", ".join(f"#{x}" for x in e["open_pulls"])
+            acts.append(_action("build", "review-pr", f"Review and merge PR {prs}", f"epic #{e['number']} has an open pull request",
+                                epic=e["number"], phase=p["number"] if p else None, pulls=e["open_pulls"]))
+    for e, p in mine:
+        if e["status"] == "in_progress" and not e["open_pulls"]:
+            left = e["tasks"]["open"]
+            what = f"{len(left)} task{'s' if len(left) != 1 else ''} open ({', '.join(f'#{t}' for t in left[:5])})" if left else "no open tasks; close the epic"
+            acts.append(_action("build", "finish-epic", f"Finish epic #{e['number']}", what,
+                                command=f"/fff:work-epic {e['number']}", epic=e["number"], phase=p["number"] if p else None))
+    for e, p in mine:
+        if e["status"] == "captured" and (p is None or p["next"] or p["status"] == "in_progress"):
+            acts.append(_action("build", "start-epic", f"Start epic #{e['number']}",
+                                f"phase {p['number']} is unblocked" if p else "captured and not started",
+                                command=f"/fff:work-epic {e['number']}", epic=e["number"], phase=p["number"] if p else None))
+
+    planned = {"done", "in_progress", "captured"}
+    for p in root["phases"]:
+        if p["epics"] or p["status"] in ("done", "in_progress", "unknown"):
+            continue
+        if all(phases[d]["status"] in planned for d in p["depends_on"] if d in phases):
+            ready = all(phases[d]["status"] == "done" for d in p["depends_on"] if d in phases)
+            name = p["title"] or "(untitled)"
+            skill = PLAN_HANDOFF.get(p.get("kind") or "design-slice")
+            # Name the roadmap, the phase and its file, so the planner can't pick up a similarly named phase.
+            command = (f'{skill.format(n=p["number"])} roadmap {root["slug"]}, phase {p["number"]} "{name}" ({p["path"]})'
+                       if skill else None)
+            reason = ("its dependencies are done, so it can be built once planned" if ready
+                      else "its dependencies are planned; plan it while they are built")
+            if not skill:
+                reason += f"; its kind ({p['kind']}) has no planning skill"
+            acts.append(_action("plan", "plan-phase", f"Plan phase {p['number']}: {name}", reason, command=command,
+                                phase=p["number"], path=p["path"], phase_kind=p.get("kind"), buildable=ready))
+        break  # plan one phase ahead at a time
+
+    gaps = [f for f in findings if f["severity"] == "warn" and f["subject"].get("slug") == root["slug"]]
+    if gaps:
+        acts.append(_action("data", "fix-data", f"Fix {len(gaps)} data gap{'s' if len(gaps) != 1 else ''}",
+                            gaps[0]["message"], count=len(gaps)))
+
+    if not any(a["lane"] in ("build", "plan") for a in acts):
+        waiting = next((p for p in root["phases"] if p["status"] not in ("done",)), None)
+        if waiting is not None:
+            deps = [f"phase {d}" for d in waiting["depends_on"] if d in phases and phases[d]["status"] != "done"]
+            deps += [f"#{i}" for i in waiting["depends_on_issues"]]
+            why = (f"waiting on {', '.join(deps)}" if deps else
+                   "its status is unknown (see data gaps)" if waiting["status"] == "unknown" else "nothing is unblocked")
+            acts.append(_action("blocked", "blocked", f"Phase {waiting['number']} is blocked", why, phase=waiting["number"]))
+        elif not root["phases"] and not mine:
+            acts.append(_action("blocked", "nothing-linked", "Nothing is linked to this plan",
+                                "no epic cites it and it has no phase files"))
+    return acts
 
 
 # ---------------------------------------------------------------- build (pure)
@@ -416,9 +526,10 @@ def build(snap: dict) -> dict:
             ep = epics[e]
             if ep["root"] is None:
                 ep["root"], ep["phase"] = slug, phase_no
-            elif (ep["root"], ep["phase"]) != (slug, phase_no) and ep["phase"] is not None:
+            elif ep["root"] != slug or (None not in (ep["phase"], phase_no) and ep["phase"] != phase_no):
+                said = f"{ep['root']}" + (f" phase {ep['phase']}" if ep["phase"] is not None else "")
                 _finding(findings, "epic-link-conflict", "warn", {"type": "epic", "number": e},
-                         f"#{e} body says {ep['root']} phase {ep['phase']}; {where} also claims it")
+                         f"#{e} body says {said}; {where} also claims it")
                 continue
             elif ep["phase"] is None:
                 ep["phase"] = phase_no
@@ -452,6 +563,14 @@ def build(snap: dict) -> dict:
         ts = sorted(tasks[n])
         done_ts = [t for t in ts if closed(t)]
         ep["tasks"] = {"total": len(ts), "closed": len(done_ts), "open": [t for t in ts if not closed(t)]}
+        # Execution order: the T<N> ordinal in the title when present, else the issue number.
+        ordinal = lambda t: (int(m.group(1)) if (m := re.match(r"T(\d+)\b", issues[t]["title"])) else 10**6, t)  # noqa: E731
+        ep["task_list"] = [{"number": t, "title": issues[t]["title"], "state": issues[t]["state"].lower(),
+                            "url": issues[t].get("url")} for t in sorted(ts, key=ordinal)]
+        for t in ep["task_list"]:
+            if re.fullmatch(r"\s*(?:T\d+\s*[—–-]?)?\s*", t["title"]):
+                _finding(findings, "task-title-blank", "warn", {"type": "epic", "number": n},
+                         f"task #{t['number']} of epic #{n} has no title beyond its ordinal ({t['title'].strip()!r})")
         ep["checklist"] = {"total": len(checklists[n]), "ticked": sum(1 for _, x in checklists[n] if x)}
         ep["open_pulls"] = sorted(set(epic_prs[n]))
         if ep["state"] == "closed":
@@ -571,7 +690,15 @@ def build(snap: dict) -> dict:
             _finding(findings, "prd-off-default-ref", "info", {"type": "prd", "path": path},
                      f"PRD {prd['slug']} is not on {default_ref}; read from {found_on[0]}")
         prds.append(prd)
-    prds.sort(key=lambda p: (PRD_STAGES.index(p["stage"]), p["slug"]))
+    # Same reading order as roots: delivered first, the earliest-stage PRDs last.
+    prd_rank = ("delivered", "delivering", "planned", "ratified", "converged", "drafting", "unknown")
+    prds.sort(key=lambda p: (prd_rank.index(p["stage"]), p["slug"]))
+
+    for r in roots.values():
+        r["next_actions"] = next_actions(r, epics, findings)
+    product = [_action("plan", "plan-roadmap", f"Plan a roadmap from PRD {p['slug']}",
+                       f"the PRD is {p['state']['status']} and no roadmap cites it", command="/fff:plan-roadmap",
+                       prd=p["slug"], path=p["prd_file"]) for p in prds if p["ready_for_planning"]]
 
     # Open issues outside every epic.
     in_epic = {t for ts in tasks.values() for t in ts}
@@ -582,8 +709,9 @@ def build(snap: dict) -> dict:
                 and "ffflow-task" not in ls and not any(EPIC_LABEL.match(l) for l in ls)):
             unlinked.append({"number": n, "title": i["title"], "url": i.get("url"), "labels": ls})
 
-    order = sorted(roots.values(), key=lambda r: (r["kind"] in ("external", "missing"), r["kind"] == "missing",
-                                                  not r["on_default_ref"], r["slug"]))
+    # Done first, then in progress, then what's still to come, so the end of the list is what's upcoming.
+    rank = {"done": 0, "in_progress": 1, "captured": 2, "not_started": 3, "unknown": 4}
+    order = sorted(roots.values(), key=lambda r: (rank.get(r["status"], 4), r["kind"] == "missing", r["slug"]))
     ep_list = sorted(epics.values(), key=lambda e: e["number"])
     count = lambda xs, s: sum(1 for x in xs if x["status"] == s)  # noqa: E731
     return {
@@ -615,6 +743,9 @@ def build(snap: dict) -> dict:
             "roots_without_prd": sum(1 for r in order if r["kind"] != "missing" and not r["prds"]),
         },
         "prds": prds,
+        "next_actions": sorted(product + [{**a, "root": r["slug"]} for r in order for a in r["next_actions"]
+                                          if a["lane"] in ("build", "plan")],
+                               key=lambda a: ACTION_ORDER.index(a["kind"])),
         "roots": order,
         "epics": ep_list,
         "unlinked_open_issues": unlinked,

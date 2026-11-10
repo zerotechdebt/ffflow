@@ -109,7 +109,8 @@ A phase is **next** when it is `not_started` or `captured`, every phase it depen
     "roots": ["worker-log-archive"],   // roadmaps whose Source: points into this bundle
     "outcomes": ["…"],
     "metrics": [{ "metric": "…", "definition": "…", "source": "…", "baseline": "48", "target": "4" }],
-    "increments": [{ "name": "Decision API", "size": "M", "text": "…" }],
+    "increments": [{ "number": 1, "name": "Decision API", "size": "M", "text": "…",
+                     "contains": "the rules as a service", "unlocks": "the agent screen" }],  // number = PRD order, not an ID
     "questions": { "open": 1, "answered": 1, "deferred": 0, "dropped": 0, "total": 2 },
     "provisional": 0,
     "planning_items": [{ "id": "P-1", "item": "…" }]
@@ -131,6 +132,10 @@ A phase is **next** when it is `not_started` or `captured`, every phase it depen
       "epics": [117], "external_epics": [],  // "owner/repo#N" captured in another tracker
       "status": "in_progress", "status_basis": "tracker", "next": false
     }],
+    "next_actions": [{                 // see /fff:pipeline-next; lanes: build | plan | data | blocked
+      "lane": "build", "kind": "finish-epic", "title": "Finish epic #117", "reason": "1 task open (#124)",
+      "command": "/fff:work-epic 117", "epic": 117, "phase": 2
+    }],
     "epics": [],                       // epics linked to the root but no phase (single plans)
     "prds": ["refunds"]                // PRDs this root was planned from
   }],
@@ -138,9 +143,11 @@ A phase is **next** when it is `not_started` or `captured`, every phase it depen
     "number": 117, "title": "…", "state": "open", "url": "…", "labels": ["epic", "ffflow-epic", "ready"],
     "root": "worker-log-archive", "phase": 2, "link_sources": ["issue_body"],   // issue_body | plan_file
     "tasks": { "total": 7, "closed": 6, "open": [124] },
+    "task_list": [{ "number": 118, "title": "T1 — …", "state": "closed", "url": "…" }],  // execution order (T<N>), then number
     "checklist": { "total": 7, "ticked": 0 },
     "open_pulls": [], "status": "in_progress"
   }],
+  "next_actions": [],                // build and plan actions across roots and ready PRDs, most urgent first
   "unlinked_open_issues": [{ "number": 12, "title": "…", "url": "…", "labels": ["bug"] }],
   "findings": [{ "code": "epic-unlinked", "severity": "warn", "subject": { "type": "epic", "number": 18 }, "message": "…" }]
 }
@@ -159,6 +166,7 @@ Graph edges for a visualizer: PRD → root (`prds[].roots`), root → phase (`ph
 | `phase-missing` | warn | an epic cites a phase with no phase file |
 | `roadmap-without-phase-files` | warn | `roadmap.md` with no `phases/phase-N.md` |
 | `declared-status-disagrees` | warn / info | a phase file's `Status:` contradicts its epics (warn when it claims done) |
+| `task-title-blank` | warn | a task issue's title is only its ordinal (`T1 — `) |
 | `checklist-stale` | info | closed tasks left unticked in the epic checklist |
 | `phase-capture-unrecorded` | info | the tracker links an epic to a phase whose file doesn't record it |
 | `root-off-default-ref` | info | a root read from a branch or the working tree, not the default ref |
@@ -173,7 +181,7 @@ Graph edges for a visualizer: PRD → root (`prds[].roots`), root → phase (`ph
 
 `viewer.html` (beside this file) is a template: one file, no network, no build. `--format html` writes it with the model embedded in `<script id="pipeline-data" type="application/json">` (the `__PIPELINE_JSON__` placeholder, `</` escaped). Opened as-is, it asks for a pipeline-status JSON file by picker or drag-and-drop, so any saved model can be viewed.
 
-A left nav lists PRDs first, when the repository has any (stage, round while drafting, a **ready** marker when ready for planning; each expands to the roadmaps planned from it), then every roadmap and plan (status and task count). A roadmap expands to its phases, each with its status, task count and a **now** (in progress) or **next** (unblocked) marker; unfinished roadmaps start expanded, and a phase links to its place in the detail view (`#/root/<slug>/<phase>`). Below the roots is a catch-all section: **Unattached work** (epics with no plan root, open issues outside every epic), **Data gaps** (findings by code) and **All epics** (a table). The main pane shows the selection: the **Overview** (summary tiles, epics in flight, a card per root with a phase strip), or one root's detail (phases top to bottom with dependencies and their epics, each with a task meter and links to its issue and open PRs, then that root's own findings; when the root came from a PRD, the PRD's increments sit beside the phases), or a PRD's detail (negotiation state and sign-offs, the roadmaps it feeds, outcomes, metrics with baseline → target, increments, items parked for planning). Views live in the URL hash (`#/root/<slug>`, `#/unattached`, …), so back, forward and bookmarks work. Status is always icon + label: ✓ done (green), ▶ in progress (blue), ○ captured / not started (grey), ? unknown (amber, a data gap). The next phase is outlined. Light and dark themes follow the OS, with a toggle. All data is inserted as text, never as HTML.
+A left nav lists PRDs first, when the repository has any, delivered first (stage, round while drafting, a **ready** marker when ready for planning; each expands to the roadmaps planned from it), then every roadmap and plan (status and task count), done first and upcoming last. A roadmap expands to its phases, each with its status, task count and a **now** (in progress) or **next** (unblocked) marker; unfinished roadmaps start expanded, and a phase links to its place in the detail view (`#/root/<slug>/<phase>`). Below the roots is a catch-all section: **Unattached work** (epics with no plan root, open issues outside every epic), **Data gaps** (findings by code) and **All epics** (a table). The main pane shows the selection: the **Overview** (a one-line summary, the project-wide next actions, and one row per PRD and roadmap with what it's on now, a phase strip, status and task progress; an About panel links to what needs attention), or one roadmap: its **next actions** at the top (build and plan lanes, each with a copyable command), then tabs for **Phases** (one row per phase with status and task progress, expanding to dependencies, epics and each epic's task issues; the phase in progress or linked to opens), **Increments** (from the PRD it came from: number, size, what each contains and unlocks, not linked to phases; without a PRD, says how a roadmap gets one), and **Data gaps**, with an **About** panel beside them (progress, source, PRD, increments by size, location), or a PRD's detail (negotiation state and sign-offs, the roadmaps it feeds, outcomes, metrics with baseline → target, increments, items parked for planning). Views live in the URL hash (`#/root/<slug>`, `#/unattached`, …), so back, forward and bookmarks work. Status is always icon + label: ✓ done (green), ▶ in progress (blue), ○ captured / not started (grey), ? unknown (amber, a data gap). The next phase is outlined. Light and dark themes follow the OS, with a toggle. All data is inserted as text, never as HTML.
 
 The viewer reads only the JSON contract above; it has no logic of its own about plans or trackers. Change the model in `pipeline.py`, the picture in `viewer.html`.
 

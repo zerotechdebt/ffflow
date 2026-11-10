@@ -52,7 +52,10 @@ html[data-theme="dark"] { background: #0d0d0d; }
   min-height: 100vh; background: var(--page); color: var(--ink);
   font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
 }
-a { color: inherit; text-decoration-color: var(--ink-3); text-underline-offset: 2px; }
+a { color: inherit; text-decoration-color: var(--ink-3); text-underline-offset: 3px; }
+::selection { background: color-mix(in srgb, var(--st-progress) 28%, transparent); color: var(--ink); }
+:focus-visible { outline: 2px solid var(--st-progress); outline-offset: 2px; border-radius: 4px; }
+.viz-root { scrollbar-color: var(--line) transparent; accent-color: var(--st-progress); font-variant-numeric: tabular-nums; }
 a:hover { text-decoration-color: var(--ink); }
 h1 { font-size: 20px; margin: 0; }
 h2 { font-size: 15px; margin: 0; }
@@ -83,7 +86,7 @@ nav.side {
   padding: 6px 8px; border-radius: 6px; text-decoration: none; color: var(--ink); font-size: 13px;
 }
 .nav-item:hover { background: var(--select); }
-.nav-item[aria-current="page"] { background: var(--select); font-weight: 600; box-shadow: inset 3px 0 0 var(--ink); }
+.nav-item[aria-current="page"] { background: var(--select); font-weight: 600; }
 .nav-item .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .nav-item .count { font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
 .nav-item .tag { font-size: 10px; text-transform: uppercase; color: var(--ink-3); margin-left: 4px; font-weight: 400; }
@@ -103,7 +106,8 @@ nav.side {
 .nav-phase.is-now { color: var(--ink); font-weight: 600; }
 .nav-phase .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .nav-phase .pn { color: var(--ink-3); font-weight: 400; }
-.nav-phase .pill .icon { width: 12px; height: 12px; font-size: 7px; }
+.nav-phase .pill .icon { width: 12px; height: 12px; }
+.nav-phase .pill .icon svg { width: 9px; height: 9px; }
 .nav-phase .count { font-size: 11px; color: var(--ink-3); font-variant-numeric: tabular-nums; font-weight: 400; }
 .marker { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; color: var(--ink); border: 1px solid var(--st-progress); border-radius: 3px; padding: 0 4px; margin-left: 6px; }
 .marker.next { border-style: dashed; }
@@ -115,15 +119,23 @@ main { padding: 24px clamp(16px, 3vw, 40px) 48px; min-width: 0; }
 .kind { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-3); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; }
 .head-progress { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-2); }
 
-.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 22px; }
-.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; text-decoration: none; color: inherit; display: block; }
-a.tile:hover { border-color: var(--ink-3); }
-.tile .label { font-size: 12px; color: var(--ink-2); }
-.tile .value { font-size: 28px; font-weight: 600; line-height: 1.2; font-variant-numeric: tabular-nums; }
-.tile .detail { font-size: 12px; color: var(--ink-3); }
+.lede { color: var(--ink-2); margin: -10px 0 22px; }
+.next-head ~ .next-head, .next + .next-head { margin-top: 28px; }
+.next-row .what .on { font-weight: 400; color: var(--ink-2); }
+.ov-rows { list-style: none; margin: 0 0 8px; padding: 0; border-top: 1px solid var(--line); }
+.ov-rows > li { border-bottom: 1px solid var(--line); }
+.ov-row { display: grid; grid-template-columns: minmax(0, 1fr) 150px 112px 128px; gap: 16px; align-items: center; padding: 11px 6px; text-decoration: none; color: inherit; border-radius: 6px; }
+.ov-row:hover { background: var(--select); }
+.ov-row .nm { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ov-row .name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ov-row .now { font-size: 13px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ov-row .prog { display: inline-flex; align-items: center; gap: 8px; justify-content: flex-end; font-size: 12px; color: var(--ink-2); }
+.ov-row .strip span { height: 6px; }
+.ov-row .tag, .rm-head .tag { font-size: 10px; font-weight: 400; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-3); margin-left: 8px; }
 
 .section { margin: 22px 0 10px; }
-.banner { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--st-unknown); border-radius: 6px; padding: 8px 12px; margin-bottom: 16px; }
+.banner { background: color-mix(in srgb, var(--st-unknown) 12%, var(--surface)); border: 1px solid color-mix(in srgb, var(--st-unknown) 45%, var(--line)); border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; }
+.banner.info { background: color-mix(in srgb, var(--st-progress) 9%, var(--surface)); border-color: color-mix(in srgb, var(--st-progress) 35%, var(--line)); }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
 
 /* Overview: one card per root */
@@ -133,9 +145,68 @@ a.root-card:hover { border-color: var(--ink-3); }
 .root-card .top { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
 .root-card .from { font-size: 12px; color: var(--ink-3); }
 
+/* Roadmap page: main column + about panel */
+.rm { display: grid; grid-template-columns: minmax(0, 1fr) 272px; gap: 32px; align-items: start; }
+.rm-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin-bottom: 18px; }
+.rm-head h1 { font-size: 22px; letter-spacing: -0.01em; }
+
+.next-head { font-size: 15px; font-weight: 600; margin: 0 0 8px; }
+.next { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); margin-bottom: 28px; }
+.next-row { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 4px 14px; align-items: start; padding: 12px 16px; }
+.next-row + .next-row { border-top: 1px solid var(--line); }
+.next-row .lane { font-size: 12px; font-weight: 600; color: var(--ink-2); padding-top: 2px; }
+.next-row .body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.next-row .what { font-weight: 600; }
+.next-row .why { color: var(--ink-2); font-size: 13px; }
+.next-row code { font: 12px/1.5 ui-monospace, "SF Mono", Menlo, monospace; background: var(--select); border-radius: 5px; padding: 3px 7px; margin-top: 4px; align-self: flex-start; overflow-wrap: anywhere; }
+.next-row button { font-size: 12px; padding: 2px 8px; }
+.next-row button:hover { border-color: var(--ink-3); }
+
+.tabs { display: flex; gap: 20px; border-bottom: 1px solid var(--line); margin-bottom: 4px; }
+.tabs button { border: 0; border-radius: 0; background: none; padding: 8px 0 9px; font-size: 14px; color: var(--ink-2); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.tabs button:hover { color: var(--ink); }
+.tabs button[aria-selected="true"] { color: var(--ink); font-weight: 600; border-bottom-color: var(--ink); }
+.tabs .n { font-weight: 400; color: var(--ink-3); margin-left: 4px; }
+
+.rows { list-style: none; margin: 0; padding: 0; }
+.rows > li { border-bottom: 1px solid var(--line); }
+.rows details > summary { list-style: none; display: grid; grid-template-columns: 34px minmax(0, 1fr) 112px 128px 14px; gap: 12px; align-items: center; padding: 12px 4px; cursor: pointer; border-radius: 6px; }
+.rows details > summary::-webkit-details-marker { display: none; }
+.rows details > summary:hover { background: var(--select); }
+.rows .pn { font-weight: 600; color: var(--ink-3); }
+.rows .pt { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rows .pt .muted { font-weight: 400; font-size: 12px; margin-left: 8px; }
+.rows .prog { display: inline-flex; align-items: center; gap: 8px; justify-content: flex-end; font-size: 12px; color: var(--ink-2); }
+.rows .chev { color: var(--ink-3); }
+.rows details[open] > summary .chev { transform: translateY(-2px) rotate(45deg); }
+.rows .body { padding: 2px 4px 14px 50px; display: flex; flex-direction: column; gap: 8px; }
+.rows li.is-selected > details > summary { background: var(--select); }
+.rows li { scroll-margin-top: 16px; }
+.rows .marker { margin-left: 8px; }
+
+.inc { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 2px 12px; padding: 14px 4px; border-bottom: 1px solid var(--line); }
+.inc .num { font-weight: 600; color: var(--ink-3); }
+.inc .name { font-weight: 600; display: flex; gap: 8px; align-items: center; }
+.inc dl { grid-column: 2; display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 2px 10px; margin: 4px 0 0; font-size: 13px; }
+.inc dt { color: var(--ink-3); }
+.inc dd { margin: 0; color: var(--ink-2); }
+.tab-note { font-size: 13px; color: var(--ink-2); padding: 12px 4px 4px; }
+
+.about { position: sticky; top: 24px; display: flex; flex-direction: column; gap: 20px; font-size: 13px; }
+.about h2 { font-size: 12px; color: var(--ink-3); font-weight: 600; margin-bottom: 6px; }
+.about .val { color: var(--ink); overflow-wrap: anywhere; }
+.about .val + .val { margin-top: 4px; }
+.about .mono { font-size: 12px; }
+.about .sizes { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+
+@media (max-width: 1180px) {
+  .rm { grid-template-columns: 1fr; gap: 28px; }
+  .ov-row { grid-template-columns: minmax(0, 1fr) 112px 128px; }
+  .ov-row .strip { display: none; }
+  .about { position: static; display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 20px 28px; border-top: 1px solid var(--line); padding-top: 20px; }
+}
+
 /* PRDs */
-.with-aside { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; align-items: start; }
-.aside-note { font-size: 12px; color: var(--ink-3); margin: 2px 0 8px; }
 .increments { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .increments li { font-size: 13px; }
 .increments .iname { font-weight: 600; }
@@ -152,20 +223,12 @@ ul.plain li { margin: 3px 0; }
 .strip span.idle { background: transparent; border: 1.5px solid var(--c); }
 
 /* Root detail: phases top to bottom */
-.timeline { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
-.phase {
-  background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--c, var(--st-idle));
-  border-radius: 8px; padding: 10px 14px; display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 4px 12px;
-}
-.phase.is-next { outline: 2px dashed var(--st-progress); outline-offset: 2px; }
-.phase.is-selected { box-shadow: 0 0 0 2px var(--ink-3); scroll-margin-top: 16px; }
-.phase .pnum { font-size: 18px; font-weight: 600; color: var(--ink-3); grid-row: span 3; }
-.phase .ptitle { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; font-weight: 600; }
 .deps { font-size: 12px; color: var(--ink-3); }
 .empty { font-size: 12px; color: var(--ink-3); font-style: italic; }
 
 .pill { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 400; color: var(--ink); white-space: nowrap; }
-.pill .icon { width: 16px; height: 16px; border-radius: 50%; display: inline-grid; place-items: center; font-size: 10px; font-weight: 700; color: #fff; background: var(--c); flex: none; }
+.pill .icon { width: 16px; height: 16px; border-radius: 50%; display: inline-grid; place-items: center; color: #fff; background: var(--c); flex: none; }
+.pill .icon svg { width: 12px; height: 12px; display: block; }
 .pill.idle .icon { background: transparent; border: 1.5px solid var(--c); color: var(--c); }
 .pill.unknown .icon { color: #0b0b0b; }
 .pill.bare { gap: 0; }
@@ -176,7 +239,13 @@ ul.plain li { margin: 3px 0; }
 .epic-row:first-child { border-top: 0; }
 .epic-row .title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-2); }
 .epic-row .num { font-weight: 600; }
-.prs { display: flex; gap: 6px; font-size: 12px; }
+.prs { display: flex; gap: 6px; font-size: 12px; white-space: nowrap; }
+.tasks { list-style: none; margin: 2px 0 6px 66px; padding: 0; display: flex; flex-direction: column; gap: 3px; font-size: 13px; }
+.tasks li { display: grid; grid-template-columns: 14px 44px minmax(0, 1fr); gap: 8px; align-items: center; color: var(--ink-2); }
+.tasks li.closed .t-title { color: var(--ink-3); }
+.tasks .pill .icon { width: 12px; height: 12px; }
+.tasks .pill .icon svg { width: 9px; height: 9px; }
+.tasks .t-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .meter { --w: 0%; position: relative; width: 90px; height: 6px; border-radius: 3px; background: var(--track); flex: none; overflow: hidden; display: inline-block; }
 .meter::after { content: ""; position: absolute; inset: 0 auto 0 0; width: var(--w); background: var(--c, var(--st-progress)); border-radius: 3px; }
@@ -202,7 +271,12 @@ td.n { font-variant-numeric: tabular-nums; }
   .shell { grid-template-columns: 1fr; }
   nav.side { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
   .epic-row { grid-template-columns: 56px minmax(0, 1fr); }
-  .with-aside { grid-template-columns: 1fr; }
+  .rows details > summary { grid-template-columns: 34px minmax(0, 1fr) 112px 14px; }
+  .rows .prog { display: none; }
+  .ov-row { grid-template-columns: minmax(0, 1fr) 112px; }
+  .ov-row .strip, .ov-row .prog { display: none; }
+  .next-row { grid-template-columns: 56px minmax(0, 1fr); }
+  .next-row button { grid-column: 2; justify-self: start; }
 }
 @media (forced-colors: active) {
   .pill .icon, .sev.warn, .strip span { forced-color-adjust: none; border: 1px solid CanvasText; }
@@ -229,6 +303,28 @@ td.n { font-variant-numeric: tabular-nums; }
     unknown:     { label: "unknown",     icon: "?", c: "var(--st-unknown)",  cls: "unknown" },
   };
   const st = (s) => STATUS[s] || STATUS.unknown;
+
+  // Status icons are drawn, one stroke weight, on a 16px grid.
+  const SVG = "http://www.w3.org/2000/svg";
+  const ICONS = {
+    "✓": [["path", { d: "M4 8.4 6.8 11 12 5.4", fill: "none", stroke: "currentColor", "stroke-width": "2", "stroke-linecap": "round", "stroke-linejoin": "round" }]],
+    "▶": [["path", { d: "M6 4.6v6.8L11.4 8Z", fill: "currentColor" }]],
+    "?": [["path", { d: "M6.2 6.3a1.9 1.9 0 1 1 2.6 1.8c-.5.2-.8.6-.8 1.1v.3", fill: "none", stroke: "currentColor", "stroke-width": "1.8", "stroke-linecap": "round" }],
+          ["circle", { cx: "8", cy: "11.9", r: "1", fill: "currentColor" }]],
+    "=": [["path", { d: "M5 6.5h6M5 9.5h6", fill: "none", stroke: "currentColor", "stroke-width": "1.8", "stroke-linecap": "round" }]],
+  };
+  const icon = (key) => {
+    if (!ICONS[key]) return null;
+    const svg = document.createElementNS(SVG, "svg");
+    svg.setAttribute("viewBox", "0 0 16 16");
+    svg.setAttribute("aria-hidden", "true");
+    for (const [tag, attrs] of ICONS[key]) {
+      const el = document.createElementNS(SVG, tag);
+      for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+      svg.append(el);
+    }
+    return svg;
+  };
 
   // PRD stages: negotiation (from state.json), then delivery (from the roadmaps that cite it).
   const STAGE = {
@@ -259,7 +355,7 @@ td.n { font-variant-numeric: tabular-nums; }
   const pill = (status, opts = {}) => {
     const s = opts.spec || st(status);
     return h("span", { class: `pill ${s.cls}${opts.bare ? " bare" : ""}`, style: { "--c": s.c }, title: opts.title || s.label },
-      h("span", { class: "icon", "aria-hidden": opts.bare ? null : "true" }, s.icon),
+      h("span", { class: "icon", "aria-hidden": opts.bare ? null : "true" }, icon(s.icon)),
       opts.bare ? h("span", { class: "sr", style: { position: "absolute", width: "1px", height: "1px", overflow: "hidden", clip: "rect(0 0 0 0)" } }, s.label) : s.label);
   };
 
@@ -307,6 +403,16 @@ td.n { font-variant-numeric: tabular-nums; }
       h("span", { class: "prs" }, ...e.open_pulls.map((p) => ext(c.prUrl(p), `PR #${p}`, "open pull request"))));
   }
 
+  // An epic row followed by its task issues, in execution order, for reference.
+  function epicWithTasks(c, n) {
+    const e = c.epics.get(n);
+    const tasks = (e && e.task_list) || [];
+    return [epicRow(c, n), tasks.length ? h("ul", { class: "tasks", "aria-label": `tasks of #${n}` }, ...tasks.map((t) =>
+      h("li", { class: t.state === "closed" ? "closed" : null },
+        pill(t.state === "closed" ? "done" : "not_started", { bare: true, title: t.state === "closed" ? "closed" : "open" }),
+        ext(t.url, `#${t.number}`, t.state), h("span", { class: "t-title", title: t.title }, t.title)))) : null];
+  }
+
   function findingList(fs) {
     const byCode = new Map();
     for (const f of [...fs].sort((a, b) => (a.severity === b.severity ? 0 : a.severity === "warn" ? -1 : 1))) {
@@ -352,7 +458,7 @@ td.n { font-variant-numeric: tabular-nums; }
       h("div", { class: "brand" },
         h("div", { class: "repo" }, m.repo || "Pipeline"),
         h("div", { class: "when" }, `${m.default_ref} · ${m.generated_at || "?"}`)),
-      item("overview", null, h("span", { class: "nav-glyph" }, "◎"), "Overview"),
+      item("overview", null, h("span", { class: "nav-glyph" }), "Overview"),
       // PRDs appear only when the repository has PRD bundles.
       (m.prds || []).length ? h("div", { class: "nav-section" },
         h("div", { class: "nav-head" }, `PRDs (${m.prds.length})`),
@@ -411,39 +517,71 @@ td.n { font-variant-numeric: tabular-nums; }
         roots.length < m.roots.length ? h("div", { class: "nav-head", style: { "text-transform": "none" } }, `${m.roots.length - roots.length} done hidden`) : null),
       h("div", { class: "nav-section" },
         h("div", { class: "nav-head" }, "Catch-all"),
-        item("unattached", null, h("span", { class: "nav-glyph" }, "⋯"), "Unattached work", c.loose.length + m.unlinked_open_issues.length,
+        item("unattached", null, h("span", { class: "nav-glyph" }), "Unattached work", c.loose.length + m.unlinked_open_issues.length,
           "epics with no plan root, and open issues outside every epic"),
-        item("findings", null, h("span", { class: "nav-glyph" }, "!"), "Data gaps", c.warns.length, "findings about the plan/tracker trail"),
-        item("epics", null, h("span", { class: "nav-glyph" }, "≡"), "All epics", m.epics.length, "table of every epic")),
+        item("findings", null, h("span", { class: "nav-glyph" }), "Data gaps", c.warns.length, "findings about the plan/tracker trail"),
+        item("epics", null, h("span", { class: "nav-glyph" }), "All epics", m.epics.length, "table of every epic")),
       h("div", { class: "nav-foot" }, themeSel, h("button", { onclick: showLoader }, "Load JSON…")));
   }
 
   // ---------------------------------------------------------------- views
 
+  // Where a root stands, in one line: the phase in progress, else the next one, else what it is.
+  function rootNow(r, c) {
+    if (r.kind === "external") return `Roadmap in ${r.repo}`;
+    if (r.kind === "missing") return "Plan root not found";
+    const cur = r.phases.find((p) => p.status === "in_progress");
+    if (cur) return `Now: P${cur.number} ${cur.title || ""}`.trim();
+    const nxt = r.phases.find((p) => p.status !== "done");
+    if (nxt) return `Next: P${nxt.number} ${nxt.title || ""}`.trim();
+    if (r.status === "done") return r.phases.length ? `All ${r.phases.length} phases done` : "Done";
+    const active = r.epics.map((n) => c.epics.get(n)).find((e) => e && e.status !== "done");
+    if (active) return `Now: #${active.number} ${active.title.replace(/^Epic:\s*/, "")}`;
+    return r.epics.length ? `${r.epics.length} epic${r.epics.length > 1 ? "s" : ""}` : "Nothing linked yet";
+  }
+
   function viewOverview(m, c) {
     const s = m.summary;
-    const tile = (label, value, detail, link) => h(link ? "a" : "div", { class: "tile", href: link },
-      h("div", { class: "label" }, label), h("div", { class: "value" }, value), h("div", { class: "detail" }, detail));
-    const inFlight = m.epics.filter((e) => e.status === "in_progress");
+    const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+    const strip = (r) => r.phases.length ? h("span", { class: "strip", "aria-label": "phases" }, ...r.phases.map((p) => {
+      const s2 = st(p.status);
+      return h("span", { class: s2.cls === "idle" ? "idle" : "", style: { "--c": s2.c }, title: `P${p.number} ${p.title || ""}: ${s2.label}` });
+    })) : h("span", { class: "strip" });
+    const prog = (r) => r.progress && r.progress.tasks_total
+      ? h("span", { class: "prog" }, meter(r.progress.tasks_closed, r.progress.tasks_total), `${r.progress.tasks_closed}/${r.progress.tasks_total}`)
+      : h("span", { class: "prog muted" }, "—");
+    const rootRow = (r) => h("li", {}, h("a", { class: "ov-row", href: href("root", r.slug) },
+      h("span", { class: "nm" }, h("span", { class: "name" }, r.slug, r.kind !== "roadmap" ? h("span", { class: "tag" }, r.kind) : null),
+        h("span", { class: "now" }, rootNow(r, c))),
+      strip(r), pill(r.status), prog(r)));
+    const prdRow = (p) => h("li", {}, h("a", { class: "ov-row", href: href("prd", p.slug) },
+      h("span", { class: "nm" }, h("span", { class: "name" }, p.title || p.slug),
+        h("span", { class: "now" }, p.roots.length ? `Planned as ${p.roots.join(", ")}` : p.ready_for_planning ? "Ready for planning" : `Round ${p.state.round || "?"} of ${p.state.round_cap || "?"}`)),
+      h("span", { class: "strip" }), stagePill(p.stage), h("span", { class: "prog muted" }, `${p.questions.open} open question${p.questions.open === 1 ? "" : "s"}`)));
+    const fact = (...kids) => h("div", { class: "val" }, ...kids);
+    const block = (title, ...vals) => h("section", {}, h("h2", {}, title), ...vals);
+
     return [
-      h("div", { class: "page-head" }, h("h1", {}, "Overview")),
-      h("div", { class: "page-meta" }, `${m.refs_scanned.length} refs scanned · tracker ${m.tracker.backend || "?"}${m.tracker.ok ? "" : " (unavailable)"}`),
-      h("div", { class: "tiles" },
-        s.prds ? tile("PRDs", s.prds, (s.ready_for_planning || []).length ? `${s.ready_for_planning.length} ready for planning` : `${s.roots_without_prd ?? 0} roots have no PRD`) : null,
-        tile("Roadmaps & plans", s.roots, `${s.roots_done} done · ${s.roots_in_progress} in progress`),
-        tile("Epics", s.epics, `${s.epics_done} done · ${s.epics_in_progress} in progress`, href("epics")),
-        tile("Next up", s.next.length, s.next.length ? s.next.map((x) => `${x.root} P${x.phase}`).join(", ") : "nothing unblocked"),
-        tile("Unattached", s.epics_unlinked + s.unlinked_open_issues, `${s.epics_unlinked} epics · ${s.unlinked_open_issues} issues`, href("unattached")),
-        tile("Data gaps", c.warns.length, `warnings · plus ${m.findings.length - c.warns.length} info`, href("findings"))),
-      inFlight.length ? h("div", {},
-        h("h3", { class: "section" }, `In flight (${inFlight.length})`),
-        h("div", { class: "card" }, h("div", { class: "epic-rows" }, ...inFlight.map((e) => {
-          const row = epicRow(c, e.number);
-          if (e.root) row.children[1].append(h("span", { class: "muted" }, " · "), h("a", { href: href("root", e.root) }, e.root));
-          return row;
-        })))) : null,
-      h("h3", { class: "section" }, "Roadmaps & plans"),
-      h("div", { class: "root-cards" }, ...m.roots.map(rootCard))];
+      h("div", { class: "rm-head" }, h("h1", {}, "Overview")),
+      h("p", { class: "lede" }, `${plural(s.roots, "roadmap or plan", "roadmaps and plans")}: ${s.roots_done} done, ${s.roots_in_progress} in progress. `,
+        `${plural(s.epics, "epic", "epics")}: ${s.epics_done} done, ${s.epics_in_progress} in progress.`),
+      h("div", { class: "rm" },
+        h("div", {},
+          (m.next_actions || []).length ? nextBand(m.next_actions, { showRoot: true, limit: 6 })
+            : h("section", {}, h("h2", { class: "next-head" }, "Next actions"), h("p", { class: "tab-note" }, "Nothing to build or plan: every roadmap is done or blocked.")),
+          (m.prds || []).length ? [h("h2", { class: "next-head" }, "PRDs"), h("ol", { class: "ov-rows" }, ...m.prds.map(prdRow))] : null,
+          h("h2", { class: "next-head" }, "Roadmaps and plans"),
+          h("ol", { class: "ov-rows" }, ...m.roots.map(rootRow))),
+        h("aside", { class: "about", "aria-label": "About this project" },
+          block("Project", fact(m.repo || "(no tracker repo)"), fact(h("span", { class: "mono" }, m.default_ref)),
+            fact(h("span", { class: "muted" }, `${m.refs_scanned.length} refs scanned · ${m.generated_at || ""}`)),
+            m.tracker.ok ? null : fact(h("span", { class: "muted" }, `Tracker unavailable: ${m.tracker.error}`))),
+          block("Epics", fact(h("a", { href: href("epics") }, plural(s.epics, "epic", "epics")), ` · ${s.epics_done} done · ${s.epics_in_progress} in progress`)),
+          block("Needs attention",
+            fact(h("a", { href: href("unattached") }, "Unattached work"), ` · ${plural(s.epics_unlinked, "epic", "epics")}, ${plural(s.unlinked_open_issues, "issue", "issues")}`),
+            fact(h("a", { href: href("findings") }, "Data gaps"), ` · ${plural(c.warns.length, "warning", "warnings")}`)),
+          (s.ready_for_planning || []).length ? block("Ready for planning", ...s.ready_for_planning.map((x) => fact(h("a", { href: href("prd", x) }, x)))) : null)),
+    ];
   }
 
   function rootCard(r) {
@@ -509,53 +647,126 @@ td.n { font-variant-numeric: tabular-nums; }
     ];
   }
 
+  function nextBand(acts, { showRoot = false, limit = 4 } = {}) {
+    const shown = acts.filter((a) => a.lane === "build" || a.lane === "plan");
+    const rest = acts.filter((a) => a.lane === "blocked");
+    const rows = (shown.length ? shown : rest).slice(0, limit);
+    if (!rows.length) return null;
+    const LANE = { build: "Build", plan: "Plan", blocked: "Blocked" };
+    const copy = (text) => {
+      const btn = h("button", { type: "button", title: "Copy the command", onclick: () => {
+        navigator.clipboard?.writeText(text).then(() => { btn.textContent = "Copied"; setTimeout(() => { btn.textContent = "Copy"; }, 1500); },
+          () => { btn.textContent = "Select and copy"; });
+      } }, "Copy");
+      return btn;
+    };
+    return h("section", { "aria-labelledby": "next-head" },
+      h("h2", { class: "next-head", id: "next-head" }, "Next actions"),
+      h("div", { class: "next" }, ...rows.map((a) => h("div", { class: "next-row" },
+        h("span", { class: "lane" }, LANE[a.lane] || a.lane),
+        h("div", { class: "body" },
+          h("span", { class: "what" }, a.title,
+            showRoot && a.root ? h("span", { class: "on" }, " on ", h("a", { href: href("root", a.root) }, a.root)) : null,
+            showRoot && a.prd ? h("span", { class: "on" }, " ", h("a", { href: href("prd", a.prd) }, "open PRD")) : null),
+          h("span", { class: "why" }, a.reason.charAt(0).toUpperCase() + a.reason.slice(1)),
+          a.command ? h("code", {}, a.command) : null),
+        a.command ? copy(a.command) : h("span", {})))));
+  }
+
+  function phaseRow(c, r, p, sub) {
+    const s2 = st(p.status);
+    const [done, total] = p.epics.reduce(([d, t], n) => {
+      const e = c.epics.get(n);
+      return e ? [d + e.tasks.closed, t + e.tasks.total] : [d, t];
+    }, [0, 0]);
+    const deps = p.depends_on.length || p.depends_on_issues.length
+      ? `After ${[...p.depends_on.map((d) => `P${d}`), ...p.depends_on_issues.map((d) => `#${d}`)].join(", ")}${p.depends_inferred ? " (from order)" : ""}`
+      : "No dependencies";
+    const selected = String(p.number) === sub;
+    const details = h("details", { open: selected || p.status === "in_progress" },
+      h("summary", {},
+        h("span", { class: "pn" }, `P${p.number}`),
+        h("span", { class: "pt", title: p.title || "" }, p.title || "(untitled)",
+          p.next ? h("span", { class: "marker next" }, "next") : null),
+        pill(p.status, { title: p.status_basis === "declared" ? "from the phase file's Status line" : null }),
+        h("span", { class: "prog" }, total ? [meter(done, total), `${done}/${total}`] : h("span", { class: "muted" }, p.status_basis === "declared" ? "declared" : "—")),
+        h("span", { class: "chev", "aria-hidden": "true" })),
+      h("div", { class: "body" },
+        h("div", { class: "deps", title: p.depends_on_text || "" }, deps, " · ", h("span", { class: "mono" }, p.path)),
+        p.epics.length ? h("div", { class: "epic-rows" }, ...p.epics.map((n) => epicWithTasks(c, n)))
+          : (p.external_epics || []).length ? h("div", { class: "empty" }, "Tracked in another repository: ",
+              ...p.external_epics.flatMap((ref, i) => [i ? ", " : "", ext(`https://github.com/${ref.replace("#", "/issues/")}`, ref)]))
+          : h("div", { class: "empty" }, p.status === "unknown" ? "Cites epics the tracker doesn't have. See Data gaps."
+            : p.status_basis === "declared" ? "No epic. The phase file marks it done." : "Not captured yet.")));
+    return h("li", { id: `phase-${p.number}`, class: selected ? "is-selected" : null }, details);
+  }
+
+  function aboutPanel(m, c, r) {
+    const p = r.progress || {};
+    const block = (title, ...vals) => vals.flat().some(Boolean) ? h("section", {}, h("h2", {}, title), ...vals) : null;
+    const prds = (r.prds || []).map((x) => c.prds.get(x)).filter(Boolean);
+    const incs = prds.flatMap((x) => x.increments);
+    const sizes = ["S", "M", "L", "XL"].map((z) => [z, incs.filter((i) => i.size === z).length]).filter(([, n]) => n);
+    return h("aside", { class: "about", "aria-label": "About this roadmap" },
+      block("Progress",
+        p.tasks_total ? h("div", { class: "val with-meter" }, meter(p.tasks_closed, p.tasks_total, true), `${p.tasks_closed}/${p.tasks_total} tasks`) : null,
+        p.phases_total ? h("div", { class: "val" }, `${p.phases_done} of ${p.phases_total} phases done`) : null,
+        !p.tasks_total && !p.phases_total ? h("div", { class: "val muted" }, "Nothing tracked yet") : null),
+      block("Source", r.source ? r.source.paths.length ? r.source.paths.map((x) => h("div", { class: "val mono" }, x)) : h("div", { class: "val" }, r.source.text) : null),
+      prds.length ? block("PRD", prds.map((x) => h("div", { class: "val" }, h("a", { href: href("prd", x.slug) }, x.title || x.slug), " ", stagePill(x.stage)))) : null,
+      incs.length ? block("Increments", h("div", { class: "val" }, `${incs.length} in the PRD, not linked to phases`),
+        h("div", { class: "sizes" }, ...sizes.map(([z, n]) => h("span", {}, h("span", { class: "size" }, z), `× ${n}`)))) : null,
+      block("Location",
+        r.kind === "external" ? h("div", { class: "val" }, ext(r.url, r.repo)) : h("div", { class: "val mono" }, r.path),
+        r.on_default_ref || r.kind === "external" ? null : h("div", { class: "val muted" }, r.found_on.length ? `Read from ${r.found_on.join(", ")}` : "Not on any scanned branch")));
+  }
+
   function viewRoot(m, c, slug, sub) {
     const r = m.roots.find((x) => x.slug === slug);
     if (!r) return [h("h1", {}, "Not found"), h("p", { class: "sub" }, `No plan root named ${slug}.`)];
     const mine = new Set([...r.epics, ...r.phases.flatMap((p) => p.epics)]);
     const fs = m.findings.filter((f) => f.subject.slug === slug || (f.subject.type === "epic" && mine.has(f.subject.number)));
+    const prds = (r.prds || []).map((x) => c.prds.get(x)).filter((p) => p && p.increments.length);
 
-    const phases = r.phases.map((p) => {
-      const s2 = st(p.status);
-      const deps = p.depends_on.length || p.depends_on_issues.length
-        ? `after ${[...p.depends_on.map((d) => `P${d}`), ...p.depends_on_issues.map((d) => `#${d}`)].join(", ")}${p.depends_inferred ? " (inferred from order)" : ""}`
-        : "no dependencies";
-      return h("li", { id: `phase-${p.number}`, class: `phase${p.next ? " is-next" : ""}${String(p.number) === sub ? " is-selected" : ""}`, style: { "--c": s2.c } },
-        h("div", { class: "pnum" }, `P${p.number}`),
-        h("div", { class: "ptitle" }, p.title || "(untitled)", pill(p.status),
-          p.status_basis === "declared" ? h("span", { class: "muted", style: { "font-size": "12px", "font-weight": "400" } }, "declared in phase file") : null,
-          p.next ? h("span", { class: "badge-next" }, "next") : null),
-        h("div", { class: "deps", title: p.depends_on_text || "" }, deps, " · ", h("span", { class: "mono" }, p.path)),
-        p.epics.length ? h("div", { class: "epic-rows" }, ...p.epics.map((n) => epicRow(c, n)))
-          : (p.external_epics || []).length ? h("div", { class: "empty" }, "tracked in another repository: ",
-              ...p.external_epics.flatMap((ref, i) => [i ? ", " : "", ext(`https://github.com/${ref.replace("#", "/issues/")}`, ref)]))
-          : h("div", { class: "empty" }, p.status === "unknown" ? "cites epics the tracker doesn't have (see data gaps below)"
-            : p.status_basis === "declared" ? "no epic; the phase file marks it done" : "not captured yet"));
-    });
+    const tabs = [];
+    if (r.phases.length) tabs.push(["phases", "Phases", r.phases.length]);
+    if (r.epics.length) tabs.push(["epics", r.phases.length ? "Other epics" : "Epics", r.epics.length]);
+    tabs.push(["increments", "Increments", prds.reduce((n, p) => n + p.increments.length, 0)]);
+    tabs.push(["gaps", "Data gaps", fs.length]);
+    const key = `pipeline:tab:${slug}`;
+    let tab = sub ? "phases" : sessionStorage.getItem(key);
+    if (!tabs.some(([k]) => k === tab)) tab = tabs[0][0];
+
+    const panels = {
+      phases: () => h("ol", { class: "rows" }, ...r.phases.map((p) => phaseRow(c, r, p, sub))),
+      epics: () => h("div", { class: "epic-rows", style: { "padding-top": "8px" } }, ...r.epics.map((n) => epicWithTasks(c, n))),
+      increments: () => !prds.length ? h("div", { class: "tab-note" },
+        h("p", { style: { margin: "0 0 6px" } }, (r.prds || []).length
+          ? "The PRD this roadmap came from lists no increments."
+          : "No increments: this roadmap wasn't planned from a PRD."),
+        h("p", { class: "muted", style: { margin: 0 } }, "Increments come from a PRD's Increments section. A roadmap shows them when the ",
+          h("code", {}, "Source:"), " line in its roadmap.md points into a PRD bundle",
+          r.source ? [" (this one's source is ", h("span", { class: "mono" }, r.source.text.replace(/\.$/, "")), ")"] : null, "."))
+        : [h("p", { class: "tab-note" }, "From the PRD, in its order. Not linked to phases yet, so delivery isn't shown."),
+        ...prds.map((p) => h("div", {}, ...p.increments.map((i) => h("div", { class: "inc" },
+          h("span", { class: "num" }, String(i.number)),
+          h("span", { class: "name" }, i.name, i.size ? h("span", { class: "size", title: "relative size" }, i.size) : null),
+          h("dl", {}, h("dt", {}, "Contains"), h("dd", {}, i.contains || i.text || "—"),
+            i.unlocks ? [h("dt", {}, "Unlocks"), h("dd", {}, i.unlocks)] : null)))))],
+      gaps: () => fs.length ? h("div", { style: { "padding-top": "4px" } }, ...findingList(fs)) : h("p", { class: "tab-note" }, "No gaps: plan files and tracker agree."),
+    };
+    const tabBar = h("div", { class: "tabs", role: "tablist" }, ...tabs.map(([k, label, n]) => h("button", {
+      type: "button", role: "tab", "aria-selected": String(k === tab), onclick: () => { sessionStorage.setItem(key, k); if (route().sub) location.hash = href("root", slug); else draw(); },
+    }, label, h("span", { class: "n" }, n))));
 
     return [
-      h("div", { class: "page-head" }, h("h1", {}, r.slug), h("span", { class: "kind" }, r.kind), pill(r.status), rootProgress(r, true)),
-      h("div", { class: "page-meta" },
-        h("span", { class: "mono" }, r.path),
-        r.source ? h("span", {}, "source: ", h("span", { class: "mono" }, r.source.text)) : null,
-        r.on_default_ref ? null : h("span", {}, r.found_on.length ? `read from ${r.found_on.join(", ")}` : "not found on any scanned ref"),
-        (r.prds || []).length ? h("span", {}, "from PRD ", ...r.prds.flatMap((x, i) => [i ? ", " : "", h("a", { href: href("prd", x) }, x)])) : null),
+      h("div", { class: "rm-head" }, h("h1", {}, r.slug), pill(r.status), r.kind !== "roadmap" ? h("span", { class: "kind" }, r.kind) : null),
       r.kind === "missing" ? h("div", { class: "banner" }, "Epics cite this plan root, but no scanned branch or the working tree holds it.") : null,
-      r.kind === "external" ? h("div", { class: "banner", style: { "border-left-color": "var(--st-progress)" } },
-        "This roadmap lives in ", ext(r.url, r.repo), ". It is shown because epics in this repository cite it; its phases are not read.") : null,
-      phases.length ? (() => {
-        const list = [h("h3", { class: "section" }, `Phases (${r.phases.length})`), h("ol", { class: "timeline" }, ...phases)];
-        const src = (r.prds || []).map((x) => c.prds.get(x)).filter((p) => p && p.increments.length);
-        if (!src.length) return list;
-        return h("div", { class: "with-aside" }, h("div", {}, list), h("aside", {}, ...src.map((p) => [
-          h("h3", { class: "section" }, "Increments in ", h("a", { href: href("prd", p.slug) }, p.slug)),
-          h("div", { class: "aside-note" }, "From the PRD; not linked to phases."),
-          h("div", { class: "card" }, increments(p))])));
-      })() : null,
-      r.epics.length ? [h("h3", { class: "section" }, phases.length ? "Epics linked to the root" : `Epics (${r.epics.length})`),
-        h("div", { class: "card" }, h("div", { class: "epic-rows" }, ...r.epics.map((n) => epicRow(c, n))))] : null,
-      !phases.length && !r.epics.length ? h("p", { class: "empty" }, "Nothing linked to this plan root yet.") : null,
-      fs.length ? [h("h3", { class: "section" }, `Data gaps for ${r.slug} (${fs.length})`), h("div", { class: "card" }, ...findingList(fs))] : null,
+      r.kind === "external" ? h("div", { class: "banner info" }, "This roadmap lives in ", ext(r.url, r.repo),
+        ". It's shown because epics here cite it; its phases aren't read.") : null,
+      h("div", { class: "rm" },
+        h("div", {}, nextBand(r.next_actions || []), tabBar, h("div", { role: "tabpanel" }, panels[tab]())),
+        aboutPanel(m, c, r)),
     ];
   }
 
