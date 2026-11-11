@@ -48,6 +48,8 @@ Three artifacts. Three roles. Three locations.
 /fff:work-fanout      Or run several in parallel across worktrees (one PR per issue).
 /fff:work-epic        Or run an epic's issues sequentially into one PR.
 /fff:audit            Periodically: check that specs, CLAUDE.md, tests still match reality.
+/fff:pipeline-status  Every roadmap at once: done, in flight, next. --format text, or JSON to visualize.
+/fff:pipeline-next    What to do next, per roadmap: build and plan lanes, each with its FFFlow command.
 ```
 
 **Maintenance loop:**

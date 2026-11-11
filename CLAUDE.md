@@ -10,6 +10,7 @@ ffflow/
 ├── plugin/                            # fff (source: "./plugin")
 │   ├── .claude-plugin/plugin.json     # fff manifest; fff's version
 │   ├── docs/migrations.md             # migration ledger read by /fff:upgrade-ffflow
+│   ├── tests/                         # unittest suite for fff skill scripts
 │   └── CLAUDE.md                      # fff design (authoritative for fff skills)
 ├── ppp/                               # ppp (source: "./ppp")
 │   ├── .claude-plugin/plugin.json     # ppp manifest; ppp's version
@@ -67,4 +68,4 @@ Migration entry ids are permanent: never rename or reuse one, because unstamped 
 
 **Catalog:** a `metadata.version` change gets a line in the catalog note at the top of the root `CHANGELOG.md`.
 
-**Process:** change a plugin → bump its plugin.json → its CHANGELOG (+ fff `migrations.md` if repo-affecting) → if `ppp/` changed, `python3 -m unittest discover -s ppp/tests` passes → if `marketplace.json` changed, bump `metadata.version` and add the catalog note → one commit with all of it → push. No tags or release artifacts today; if that changes, document it here.
+**Process:** change a plugin → bump its plugin.json → its CHANGELOG (+ fff `migrations.md` if repo-affecting) → if `ppp/` changed, `python3 -m unittest discover -s ppp/tests` passes → if `plugin/` changed, `python3 -m unittest discover -s plugin/tests` passes → if `marketplace.json` changed, bump `metadata.version` and add the catalog note → one commit with all of it → push. No tags or release artifacts today; if that changes, document it here.

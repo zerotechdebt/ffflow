@@ -54,6 +54,7 @@ ffflow/                                # repo root (also the marketplace)
     ├── .claude-plugin/
     │   └── plugin.json
     ├── CLAUDE.md                      # This file
+    ├── tests/                         # unittest suite for skill scripts (see Tests)
     ├── docs/
     │   ├── architecture.md            # Build spec (authoritative)
     │   ├── levels.md                  # The L0–L3 dial explained
@@ -86,6 +87,16 @@ When authoring or editing skills, enforce these. Full text in `docs/architecture
 - **Idempotency.** Every state-writing skill detects existing state and updates rather than duplicating.
 - **Resume-ability.** Long-running skills persist state to disk between meaningful steps.
 - **Memorable typeahead names.** Distinctive word first.
+
+## Tests
+
+```
+python3 -m unittest discover -s plugin/tests -v
+```
+
+Run from the repo root; stdlib only. Run it whenever `plugin/` changes; it must pass before a release.
+
+Skills are prose. When a skill needs deterministic logic (parsing, joining, rendering), it ships a stdlib-only Python script in its own folder (`skills/<skill>/<script>.py`) and invokes it via `${CLAUDE_PLUGIN_ROOT}`. Each script has one test module here, `test_<skill>.py` (hyphens become underscores), which loads the script by path. Keep the logic a pure function of its inputs, with git, `gh` and the filesystem at the edges, so tests feed it data instead of calling them.
 
 ## Related projects
 
