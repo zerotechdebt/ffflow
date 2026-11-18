@@ -15,6 +15,9 @@ Architecture rules live in `.ffflow/config.yaml` under an `architecture:` block:
 ```yaml
 architecture:
   style: hexagonal
+  rules_from:                  # optional: where the layering is already written down
+    - docs/specs/architecture.md
+    - eslint.config.js         # e.g. import-restriction rules
   rules:
     - "src/domain/** must not import from src/infrastructure/**"
     - "src/domain/** must not import from src/application/**"
@@ -30,6 +33,10 @@ For hex projects, `style: hexagonal` triggers default rules from `hexagonal-arch
 User can override or extend.
 
 For non-hex projects, the user declares rules explicitly. No defaults are imposed.
+
+`rules_from` points at files that already state the layering (a spec, lint rules). Read the rules there; `rules` adds to them. Layer folders are the project's own (`src/app`, `src/infra/<adapter>`), not fixed names — map the hexagonal defaults onto them.
+
+No `architecture:` block: look for layering rules in the root CLAUDE.md, the specs and the lint config. Audit against what you find and name the source in the report. Nothing found: one low finding, "no declared architecture".
 
 ## Inputs
 
@@ -75,7 +82,8 @@ For each rule:
 
 ### 4. Severity ladder
 
-- **Low**: stylistic (e.g., circular imports within a layer).
+- **Informational**: import cycles made only of type-only imports (TypeScript `import type`). They vanish at build. List them apart from runtime cycles; they never fail the audit.
+- **Low**: stylistic (e.g., runtime circular imports within a layer).
 - **Medium**: cross-layer violation (the common case).
 - **High**: domain importing infra (the architecturally fatal violation).
 

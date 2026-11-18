@@ -35,7 +35,7 @@ Absorbs the former `justfile-init` skill — justfile bootstrapping happens here
 ## Dependencies
 
 - The `stack` skill (specifically the cartridge matching `.ffflow/config.yaml stack:`).
-- The `justfile` skill (baseline + tier-appropriate cartridges).
+- The `justfile` skill (baseline + a cartridge per tier up to `justfile_maturity` in `.ffflow/stack.yaml`).
 - `git-hooks` and `ci-gates` for hooks and CI workflow.
 
 ## Idempotency
@@ -183,7 +183,7 @@ Replaces the former `/justfile-init upgrade <pattern>` flow:
 /stack-init upgrade <pattern>   # add one specific pattern without full upgrade
 ```
 
-`<pattern>` is one of the justfile tier cartridges: `quality` (Tier 1), `security` (Tier 2), `advanced` (Tier 3), `polyglot` (Tier 4). Each loads its cartridge from the `justfile` skill.
+`<pattern>` is one of the justfile tier cartridges: `quality` (Tier 1), `security` (Tier 2), `advanced` (Tier 3), `polyglot` (Tier 4). Each loads its cartridge from the `justfile` skill. Adding a whole tier raises `justfile_maturity` in `.ffflow/stack.yaml` to that tier; adding single recipes does not.
 
 ## Anti-patterns
 

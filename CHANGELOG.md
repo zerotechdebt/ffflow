@@ -10,6 +10,21 @@ The format is loosely [Keep a Changelog](https://keepachangelog.com/); versionin
 
 ---
 
+## [0.4.4] — 2026-11-18
+
+Field fixes from a TypeScript L1 project running `/fff:justfile`, `/fff:stack-assess` and `/fff:audit` on 0.4.3. No migration: nothing in an adopted repo becomes wrong.
+
+### Changed
+- **`justfile`: recipe names are the interface; comments tell the truth.** The rule "Exact comments. Comment strings must match. Validation checks them." claimed a check no skill runs, and the default comments encode a default policy ("CRITICAL severity, fixable only", "GPL/LGPL/AGPL in prod deps") that a stricter project then had to mislabel. Names must still match. Every recipe carries a one-line comment saying what it does in this project; a cartridge's comment is only the default wording.
+- **Justfile maturity has a home: `justfile_maturity: <0–4>` in `.ffflow/stack.yaml`** (absent means 0). The skills spoke of "maturity ≥ 2" without a key, so projects invented one. `stack-assess` checks tiers up to it; `stack-init upgrade <tier>` raises it.
+
+### Fixed
+- **`audit` claude-md: first registration reads the file.** It said to stamp an unregistered CLAUDE.md at HEAD without reading it, against the rule that a stamp means an auditor read the file. It now validates first.
+- **`audit`: findings have a record.** Open findings go under their auditor's `findings:` list in `.ffflow/audit.yaml` (file, line, type, severity, status, found/fixed commits). The auditor closes a finding when a run no longer sees it. The refactor and tech-debt cartridges point there.
+- **`audit`: stamps survive squash merges.** Stamp a commit that survives the merge; re-stamp after a squash or rebase; commit the record after the code it describes.
+- **`audit` false positives.** tech-debt judges `later`/`eventually` by meaning, not word (time-order uses are not deferrals). claude-md drops its 5-line minimum, which contradicted "a 2-line CLAUDE.md beats none". refactor's hot-spot churn skips sweep commits (`hot_spot_sweep_share`, default 0.2). architecture lists type-only import cycles as informational, apart from runtime cycles.
+- **`audit` architecture: point at existing layering rules.** `architecture.rules_from` names a spec or lint config that already states the layering; layer folders are the project's own. With no `architecture:` block, the auditor looks in the root CLAUDE.md, specs and lint config before reporting "no declared architecture".
+
 ## [0.4.3] — 2026-10-14
 
 ### Changed

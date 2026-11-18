@@ -295,6 +295,7 @@ auditors:
 
 ```yaml
 extends: typescript-stack
+justfile_maturity: 2            # justfile tier 0–4; absent means 0
 dimensions:
   test_runner: { tool: jest }
   coverage_threshold_line: 90

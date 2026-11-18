@@ -47,7 +47,7 @@ Adding a stack = add one file in `tier-2-security/`; do not edit this concept fi
 
 ## CI integration
 
-`ci-gates` workflow includes (at justfile maturity ≥ 2):
+`ci-gates` workflow includes (at `justfile_maturity` ≥ 2):
 
 ```yaml
   gate-security:

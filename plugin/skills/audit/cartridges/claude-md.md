@@ -77,7 +77,7 @@ For each CLAUDE.md in the state file:
 
 - Files inside `scope` changed since `commit`? → finding: `stale (drift)`.
 - More than `max_age_days` since `date`? → finding: `stale (age)`.
-- Not in the state file at all? → opportunistic register: add an entry pinned to current HEAD.
+- Not in the state file at all? → first registration: read it against its scope like any validation. Stamp HEAD only if it holds; otherwise report what's wrong. Never stamp unread.
 
 Drift is the more useful signal. Age catches cases where neither has changed but the project moved underneath the doc (deps changed, infra changed).
 
@@ -86,7 +86,7 @@ Drift is the more useful signal. Age catches cases where neither has changed but
 For each CLAUDE.md:
 
 - **Too big** (> 500 lines): suggest split.
-- **Too small** (< 5 lines): suggest expand or delete.
+- **Empty** (nothing beyond a heading): suggest fill or delete. No line minimum — a 2-line CLAUDE.md beats none.
 - **High overlap with another CLAUDE.md** (> 70% lines match): suggest consolidate.
 - **Location mismatch** (CLAUDE.md at path X claims scope outside its tree): suggest move or correct scope.
 - **Scope pattern matches zero files**: suggest delete.

@@ -10,13 +10,13 @@ description: Justfile interface and maturity model for FFFlow — baseline recip
 The shared build interface every FFFlow project implements, plus the maturity model for adding tier-specific patterns over time.
 
 Two concerns combined into one skill:
-1. **Baseline interface** — the recipes every project has, with exact comment conventions so tooling can grep for them.
+1. **Baseline interface** — the recipes every project has, under exact names so people and tooling can call them.
 2. **Maturity model** — when and why to add Tier 1–4 patterns. Cartridges under `cartridges/` carry the recipes for each tier.
 
 ## Terminology: Level vs. Tier
 
 - **Level (L0–L3)** = FFFlow methodology rigor (declared in `.ffflow/config.yaml`). Affects spec discipline.
-- **Tier (0–4)** = justfile maturity (orthogonal to level). Affects build-interface completeness.
+- **Tier (0–4)** = justfile maturity (orthogonal to level). Affects build-interface completeness. Declared as `justfile_maturity: <0–4>` in `.ffflow/stack.yaml`; absent means 0.
 
 A project at FFFlow L1 might be at justfile Tier 0 (just bootstrapped) or Tier 3 (production). Pick each independently.
 
@@ -106,7 +106,7 @@ check-all: format lint typecheck coverage spec-coverage spec-audit
 
 ## Rules
 
-- **Exact comments.** Comment strings must match. Validation checks them.
+- **Exact names, true comments.** Recipe names must match; tooling calls them. Every recipe carries a one-line comment saying what it does in this project. A cartridge's comment is the default wording for the default recipe. When your recipe differs (a severity, a threshold, an allow-list in place of a deny-list), its comment says what it really does.
 - **All required recipes present (per tier and level).** Stub missing ones.
 - **`check-all` order**: format, lint, typecheck, coverage, spec-coverage, spec-audit. Fastest first.
 - **`test` vs `spec-test`.** `test` runs unit tests. `spec-test` runs BDD scenarios. They do not overlap. `coverage` measures unit coverage. `spec-coverage` measures spec coverage.
@@ -153,7 +153,7 @@ Cartridges are markdown files under `cartridges/`. Load only the cartridge(s) fo
 
 Missing required recipes are a finding. Stubs satisfy the requirement.
 
-Plus tier-appropriate recipes per the ladder.
+Plus the recipes of every tier up to the declared `justfile_maturity`.
 
 ## Stack implementations
 
@@ -162,7 +162,7 @@ See the `stack` skill's cartridges (`python.md`, `typescript.md`, `java.md`, `po
 ## Anti-patterns
 
 - Renaming recipes (`format` → `fmt`, `test` → `t`). Tooling expects exact names.
-- Comment-stripping recipes. Comments are part of the interface.
+- A recipe with no comment, or a comment describing something other than what it runs.
 - Putting integration tests in `test`. Use a separate recipe (`integration-test`, from Tier 1).
 - Adding `mutate` to `check-all`. Slow gates kill the loop.
 - Skipping Tier 0. Baseline is non-negotiable.
