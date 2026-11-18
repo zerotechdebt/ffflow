@@ -52,6 +52,8 @@ Comments that *try* to defer but use forbidden vague language:
 
 These are deferral-without-deferral. Findings either way — sharpen the trigger or fix now.
 
+Match by meaning, not by word. `later` and `eventually` also describe time order ("the token is checked later in the pipeline"). A comment that defers no work is not a finding.
+
 ### 3. "We should..." / "Consider..." patterns
 
 Comments expressing preference without action:
@@ -116,6 +118,8 @@ Per the standard audit result format:
 ```
 
 Severity is **low** by default — these are not blockers. They're signals that compound. Project owners can raise severity via config if they want CI to gate on them.
+
+Open findings are recorded in `.ffflow/audit.yaml` per the `audit` skill ("Findings record"), with `category` as `type`.
 
 ## Severity rules
 

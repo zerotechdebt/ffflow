@@ -92,6 +92,27 @@ For each cartridge's `state_updates`, merge into `.ffflow/audit.yaml`. This is t
 
 If two cartridges update the same key, last-write-wins is fine — they shouldn't disagree.
 
+**Stamp a commit that survives the merge.** Squash and rebase rewrite hashes, leaving stamps that name commits that no longer exist. Re-stamp after a squash or rebase. The record commits after the code it describes, never with it.
+
+### 4a. Findings record
+
+Open findings live under their auditor, beside `files`:
+
+```yaml
+auditors:
+  tech-debt:
+    findings:
+      - file: src/auth/signup.py
+        line: 42
+        type: bare-todo          # the finding's category
+        severity: low
+        status: open             # open | fixed
+        found: abc123            # commit where first seen
+        fixed: def456            # set when closed
+```
+
+Each run matches findings by file, type and content (snippet or summary) — lines move. A recorded finding the run no longer sees becomes `status: fixed` with `fixed: <HEAD>`. Only the auditor closes a finding; an editor's fix waits for the next run, like a stamp. Fixed entries may be pruned once their `fixed` commit is on the default branch.
+
 ### 5. Render report
 
 Default human-readable:

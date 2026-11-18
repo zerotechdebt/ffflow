@@ -64,7 +64,7 @@ Promote when the friction of the current level exceeds the cost of the next. Don
 Don't confuse FFFlow level with `justfile` (0–4). They answer different questions:
 
 - **FFFlow level (L0–L3)**: how rigorous is the spec discipline?
-- **Justfile maturity (0–4)**: how complete is the build interface?
+- **Justfile maturity (0–4)**: how complete is the build interface? Declared as `justfile_maturity` in `.ffflow/stack.yaml`.
 
 A project at FFFlow L1 might have justfile maturity 0 (just bootstrapped), 2 (deploying to prod), or 4 (polyglot monorepo). Pick each independently. See `justfile` for the maturity ladder.
 

@@ -30,6 +30,7 @@ audit_refactor:
   file_loc_block: 500
   duplication_threshold: 0.3         # 30% identical lines
   hot_spot_lookback_commits: 50
+  hot_spot_sweep_share: 0.2          # commits touching > 20% of files don't count as churn
   test_unit_max_ms: 50
   test_spec_max_ms: 200
   test_suite_max_seconds: 30
@@ -73,7 +74,7 @@ Any duplicate cluster above `duplication_threshold` is a finding. Cite both/all 
 
 Combine complexity with churn:
 
-- For each file with complexity ≥ 8, count its commits in the last `hot_spot_lookback_commits`.
+- For each file with complexity ≥ 8, count its commits in the last `hot_spot_lookback_commits`. Skip sweep commits — ones touching more than `hot_spot_sweep_share` of tracked files (renames, format runs). They inflate every file's churn equally.
 - "Hot spots" = complexity ≥ 8 AND churn in top 25%. Surface as high-priority findings.
 
 The idea: a complex file nobody touches is fine; a complex file everyone keeps touching is where bugs accumulate.
@@ -110,6 +111,8 @@ Sort findings by `impact / (complexity + 1)`:
 - Removing redundant tests: medium impact, low complexity.
 - DRY refactoring: medium impact, medium complexity.
 - Complexity reduction in a hot spot: high impact, high complexity → still high priority because of the impact.
+
+Open findings are recorded in `.ffflow/audit.yaml` per the `audit` skill ("Findings record").
 
 ## Plan-generation flow
 

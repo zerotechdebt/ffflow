@@ -26,7 +26,7 @@ Console report.
 
 - Level (default L0).
 - Stack (one of `python`, `typescript`, `java`, `polyglot` — resolves to a cartridge under `stack/`).
-- `.ffflow/stack.yaml` overrides if present.
+- `.ffflow/stack.yaml` overrides if present, including `justfile_maturity` (0–4; absent means 0).
 
 If no config: report "no FFFlow config; run /init-ffflow first" and exit.
 
@@ -52,7 +52,7 @@ Mark each as `OK`, `missing`, `misconfigured`, or `lower-than-floor`.
 ### 4. Justfile & infra checks
 
 - Baseline `justfile` recipes present (`test`, `lint`, `format`, `typecheck`, `coverage`, `check-all`)?
-- Tier-appropriate pattern groups present (justfile tier is orthogonal to FFFlow level). Cartridges live under `skills/justfile/cartridges/`:
+- Pattern groups present for every tier up to `justfile_maturity` (orthogonal to FFFlow level). Recipes from a higher tier are fine; report them, don't demand the rest. Cartridges live under `skills/justfile/cartridges/`:
   - Tier 1: `tier-1-quality.md` (test-watch, integration-test, complexity, loc, duplicates, slowtests)
   - Tier 2: `tier-2-security.md` (vulns, lic, sbom, doctor)
   - Tier 3: `tier-3-advanced.md` (deploy, migrate, logs, status)

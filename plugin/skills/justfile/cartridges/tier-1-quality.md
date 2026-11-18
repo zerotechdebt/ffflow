@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Add Tier 1 justfile recipes — quality reporting and dev-loop convenience. Non-blocking by default (informational). Loaded by `stack-init` when the project upgrades to justfile maturity ≥ 1.
+Add Tier 1 justfile recipes — quality reporting and dev-loop convenience. Non-blocking by default (informational). Loaded by `stack-init` when the project's `justfile_maturity` reaches 1.
 
 ## Recipes
 
